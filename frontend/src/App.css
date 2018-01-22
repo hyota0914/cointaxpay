@@ -1,0 +1,45 @@
+.text-lg {
+  font-size: 32px;
+}
+body{
+  font-family: 'Raleway', san-serif;
+}
+.nav-container {
+  background: #666;
+  height: 60px;
+  padding-left: 20px;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1024;
+}
+.nav-container a {
+  color: white;
+}
+.main-container {
+  margin-top: 80px;
+}
+.float-button {
+  margin-right: 5px;
+}
+.pastearea {
+  height: 120px;
+}
+.alert {
+  background: #fcf8e5;
+  color: #b48728;
+  border: 1px solid #f8ebcf;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.hover-links a { text-decoration: none; }
+.hover-links a:hover { text-decoration: underline; }
+.inline-list {
+  margin-bottom: 0px; /* Skelton reset */
+}
+.inline-list li {
+  display: inline;
+  margin: 0 20px 0 0;
+}
+

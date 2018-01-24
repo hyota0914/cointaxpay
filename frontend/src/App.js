@@ -3,6 +3,16 @@ import { Route, Link } from 'react-router-dom';
 import './App.css';
 
 // --------------------------------------------------
+// consts
+// --------------------------------------------------
+const EXCHANGES = [
+  ["binance"  , "Binance"],
+  ["zaif"     , "Zaif"   ],
+  ["bitbank"  , "bitbank"],
+  ["coincheck", "coincheck"],
+];
+
+// --------------------------------------------------
 // Login
 // --------------------------------------------------
 class Login extends Component {
@@ -49,12 +59,8 @@ class LandingView extends Component {
         </div>
         <br />
         <div>
-          <b>[お願い事項その１]</b><br />
-          本アプリのサーバ費用は個人で負担しております。<br />
+          <b>[お願い事項]</b><br />
           継続的なサービス提供を行うため、少額の寄付または下記リンクでの取引所登録をお願いいたします。<br />
-          週に数日、機能追加や改善を行なっていくためのモチベーションにもなります！(^ ^)<br />
-          なお、本アプリはオープンソースです(github)。<br />
-          随時PullRequestおよびIssue報告をお待ちしております。<br />
         </div>
         <br />
         <div>
@@ -98,87 +104,81 @@ class ImportView extends Component {
 
   constructor(props) {
     super(props);
-
-    // specify format
     const querystring = require('querystring');
-    let format = querystring.parse(window.location.search.slice(1))['format'];
-    this.state = {format: format}
-
-    this.handleChangeFormat = this.handleChangeFormat.bind(this)
+    this.state = {exchange: querystring.parse(window.location.search.slice(1))['exchange']}
     this.handleChangeHistory = this.handleChangeHistory.bind(this)
   }
 
-  parseTradeHistory() {
-    console.log(this.state);
-    let data = this.state.history;
-    if (!data) {
-      return;
-    }
-    if (this.state.format === 'zaif') {
-      let f = require('./lib/cryptcoin-trade-parser').parseZaifData;
-      let ret = f(data);
-    }
-    else if (this.state.format === 'binance') {
-      let f = require('./lib/cryptcoin-trade-parser').parseBinanceData;
-      let ret = f(data);
-    }
-    else if (this.state.format === 'bitbank') {
-      let f = require('./lib/cryptcoin-trade-parser').parseBitbankData;
-      let ret = f(data);
-    }
-    else if (this.state.format === 'coincheck') {
-      let f = require('./lib/cryptcoin-trade-parser').parseCoincheckData;
-      let ret = f(data);
-    }
-  }
-
   handleChangeHistory(event) {
-    let data = event.target.value;
-    this.setState({history: data});
-    setTimeout(() => {
-      this.parseTradeHistory();
-    }, 100);
-  }
-
-  handleChangeFormat(event) {
-    this.setState({format: event.target.value});
+    let parser;
+    switch(this.state.exchange) {
+      case 'zaif': {
+        parser = require('./lib/parse-zaif-trade-history').parseZaifTradeHistory;
+        break;
+      }
+      case 'binance': {
+        parser = require('./lib/parse-binance-trade-history').parseBinanceTradeHistory;
+        break;
+      }
+      case 'bitbank': {
+        parser = require('./lib/parse-bitbank-trade-history').parseBitbankTradeHistory;
+        break;
+      }
+      case 'coincheck': {
+        parser = require('./lib/parse-coincheck-trade-history').parseCoincheckTradeHistory;
+        break;
+      }
+      default:
+        // do nothing
+        break;
+    }
+    try {
+      const tradeList = parser(event.target.value);
+      console.log(tradeList);
+    } catch (e) {
+      console.log(e);
+      // TODO: handle error
+    }
   }
 
   render() {
-    let format = formats.find((x) => { return x[0] === this.state.format });
     let alertMessage;
-    let appendForm;
-
-    if (format[0] === 'zaif') {
-      alertMessage = (
-        <div className="alert">
-          [How to]<br />
-          WebブラウザでZaifにログインし、取引履歴をコピーして貼り付けてください。<br />
-          [Format]<br />
-          注文	価格	数量	手数料	ボーナス	日時<br />
-          * Tab区切り、またはカンマ区切り
-        </div>);
+    switch (this.state.exchange) {
+      case 'zaif':
+        alertMessage = (
+          <div className="alert">
+            [How to]<br />
+            WebブラウザでZaifにログインし、取引履歴をコピーして貼り付けてください。<br />
+            [Format]<br />
+            注文	価格	数量	手数料	ボーナス	日時<br />
+            * Tab区切り、またはカンマ区切り
+          </div>);
+        break;
+      case 'binance':
+        alertMessage = (
+          <div className="alert">
+            [How to]<br />
+            BinanceからTradeHistoryをダウンロードし、内容をコピーして貼り付けてください。<br />
+            [Format]<br />
+            Date  Market  Type  Price Amount  Total Fee Fee Coin<br />
+            * Tab区切り、またはカンマ区切り
+          </div>);
+        break;
+      case 'coincheck':
+        alertMessage = (
+          <div className="alert">
+            [How to]<br />
+            Coincheckから取引履歴CSVをダウンロードし、内容をコピーして貼り付けてください。<br />
+            [Format]<br />
+            ID,日付,操作内容,金額,通貨,JPY,BTC,ETH,ETC,DAO,LSK,FCT,XMR,REP,XRP,ZEC,XEM,LTC,DASH,BCH<br />
+            * Tab区切り、またはカンマ区切り
+          </div>);
+        break;
+      default:
+        // do nothing
+        break;
     }
-    else if (format[0] === 'binance') {
-      alertMessage = (
-        <div className="alert">
-          [How to]<br />
-          BinanceからTradeHistoryをダウンロードし、内容をコピーして貼り付けてください。<br />
-          [Format]<br />
-          Date  Market  Type  Price Amount  Total Fee Fee Coin<br />
-          * Tab区切り、またはカンマ区切り
-        </div>);
-    }
-    else if (format[0] === 'coincheck') {
-      alertMessage = (
-        <div className="alert">
-          [How to]<br />
-          Coincheckから取引履歴CSVをダウンロードし、内容をコピーして貼り付けてください。<br />
-          [Format]<br />
-          ID,日付,操作内容,金額,通貨,JPY,BTC,ETH,ETC,DAO,LSK,FCT,XMR,REP,XRP,ZEC,XEM,LTC,DASH,BCH<br />
-          * Tab区切り、またはカンマ区切り
-        </div>);
-    }
+    const exchange = EXCHANGES.find(x => { return x[0] === this.state.exchange; });
 
     return (
       <div>
@@ -186,18 +186,12 @@ class ImportView extends Component {
         {alertMessage}
         <form>
           <div className="row">
-            <div className="six columns">
-              <label>
-                フォーマット
-                <select className="u-full-width" name="format" defaultValue={format[0]} onChange={this.handleChangeFormat}>
-                  <option value={format[0]}>{format[1]}</option>
-                </select>
-              </label>
-            </div>
-            <div className="six columns">
+            <div className="three columns">
               <label>
                 取引所
-                <input className="u-full-width" type="text" name="exchange-name" defaultValue={format[1]} />
+                <select className="u-full-width" name="exchange" defaultValue={exchange[0]}>
+                  <option value={exchange[0]}>{exchange[1]}</option>
+                </select>
               </label>
             </div>
           </div>
@@ -215,25 +209,18 @@ class ImportView extends Component {
   }
 }
 
-let formats = [
-  ["binance"  , "Binance"],
-  ["zaif"     , "Zaif"   ],
-  ["bitbank"  , "bitbank"],
-  ["coincheck", "coincheck"],
-];
-
-class SelectFormatView extends Component {
+class SelectExchangeView extends Component {
   render() {
-    let exchangeList = formats.map((x) => {
+    const exchangeList = EXCHANGES.map(x => {
       return (
-        <Link className="button float-button" to={"/import?format="+x[0]} key={x[0]}>
+        <Link className="button float-button" to={"/import?exchange="+x[0]} key={x[0]}>
           {x[1]}
         </Link>)
     });
     return (
       <div>
-        <h3>取引履歴フォーマット選択</h3>
-        <div className="row">アップロードする取引履歴のフォーマットを選択してください</div>
+        <h3>取引所選択</h3>
+        <div className="row">アップロードする取引履歴の取引所を選択してください</div>
         <form>
           {exchangeList}
         </form>
@@ -243,7 +230,7 @@ class SelectFormatView extends Component {
 }
 
 // --------------------------------------------------
-// Navigation
+// Common parts
 // --------------------------------------------------
 class Navigation extends Component {
   render() {
@@ -253,7 +240,7 @@ class Navigation extends Component {
           <ul className='inline-list hover-links nav-list six columns'>
             <li><Link to="/" className='text-lg'>Crypttax</Link></li>
             <li><Link to="/history/">取引一覧</Link></li>
-            <li><Link to="/select-format/">取引一括登録</Link></li>
+            <li><Link to="/select-exchange/">取引一括登録</Link></li>
           </ul>
         </div>
       </div>
@@ -265,7 +252,7 @@ class Main extends Component {
   render() {
     return (
       <div className="main-container container">
-        <Route path='/select-format' component={SelectFormatView} />
+        <Route path='/select-exchange' component={SelectExchangeView} />
         <Route path='/import' component={ImportView} />
         <Route path='/' exact component={LandingView} />
       </div>
@@ -273,7 +260,7 @@ class Main extends Component {
   }
 }
 
-const App = () => {
+const App = function() {
   return (
     <div>
       <Navigation />

@@ -1,0 +1,14 @@
+{
+  "name": "parse-bitbank-trade-history",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "author": "hyota0914",
+  "license": "ISC",
+  "devDependencies": {
+    "jasmine": "^2.9.0"
+  }
+}

@@ -3,3 +3,5 @@
 # described in https://git-scm.com/docs/gitignore
 
 .idea/
+personal-data/
+.DS_Store

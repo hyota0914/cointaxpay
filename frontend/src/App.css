@@ -32,7 +32,12 @@ body{
   padding: 18px;
   margin-bottom: 18px;
 }
-
+.error-message {
+  color: red;
+}
+.success-message {
+  color: green;
+}
 .hover-links a { text-decoration: none; }
 .hover-links a:hover { text-decoration: underline; }
 .inline-list {

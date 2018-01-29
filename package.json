@@ -1,0 +1,30 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "home": "",
+  "dependencies": {
+    "amazon-cognito-identity-js": "^1.31.0",
+    "login-with-twitter": "^1.2.0",
+    "node-twitter-api": "^1.8.0",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-query-params": "^1.0.7",
+    "react-router-dom": "4.2.2",
+    "react-scripts": "1.1.0",
+    "storage2": "^0.1.0",
+    "twitter-node-client": "0.0.6"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.186.0",
+    "jasmine": "^2.9.0",
+    "json-loader": "^0.5.7",
+    "webpack": "^3.10.0"
+  }
+}

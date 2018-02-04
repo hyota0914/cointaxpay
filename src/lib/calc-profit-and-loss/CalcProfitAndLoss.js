@@ -5,7 +5,7 @@ function defaultBalance(ccy) {
     ccy: ccy,
     latest: {
       amount: 0,
-      priceJpy: 0,
+      priceJpy: 1,
     },
   };
 }
@@ -101,6 +101,10 @@ function calcProfitAndLossPerTrade(trade, balance) {
     // If side is sell, need to recalc "total average price" of the counter ccy.
     counterCcyBalance.latest.priceJpy = round(((trade.counterBeforeBalance.amount * trade.counterBeforeBalance.priceJpy)
       + (trade.total * trade.counterCcyMarketPrice)) / (trade.counterBeforeBalance.amount + trade.total), 9);
+    if (counterCcy === 'JPY' && counterCcyBalance.latest.priceJpy !== 1) {
+      console.log(trade);
+      throw new Error(`Sorry, failed to calc jpy balance`);
+    }
     if (isNaN(counterCcyBalance.latest.priceJpy) || !isFinite(counterCcyBalance.latest.priceJpy)) {
       console.log(trade);
       throw new Error(`Sorry, failed to calc jpy price`);
@@ -113,12 +117,12 @@ function calcProfitAndLossPerTrade(trade, balance) {
     if (trade.side === 'B') {
       // If side is buy, need to calc profit and loss of counter ccy.
 			profitAndLoss = counterCcy === 'JPY' ? 0
-        : floor(trade.total * trade.counterCcyMarketPrice
-          - trade.amount * trade.priceJpy);
+        : round(trade.total * trade.counterBeforeBalance.priceJpy
+          - trade.amount * trade.priceJpy, 9);
     } else if (trade.side === 'S') {
       // If side is sell, need to calc profit and loss of base ccy.
-      profitAndLoss = floor(trade.amount * trade.priceJpy
-        - trade.amount * baseCcyBalance.latest.priceJpy);
+      profitAndLoss = round(trade.amount * trade.priceJpy
+        - trade.amount * baseCcyBalance.latest.priceJpy, 9);
     }
     trade.pl = profitAndLoss;
     if (isNaN(trade.pl) || !isFinite(trade.pl)) {

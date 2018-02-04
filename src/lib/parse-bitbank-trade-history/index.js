@@ -7,6 +7,7 @@ module.exports.parseBitbankTradeHistory = function(hist) {
     const [baseCcy, counterCcy] = trade[2].split('_').map(x => x.toUpperCase());
     const tradeDateUnixTime = Date.parse(trade[8]);
     if (isNaN(tradeDateUnixTime)) throw new Error(`Invalid input! "${trade}"`);
+    const total = Math.abs(Number(Math.round((trade[4] * trade[5]) + 'e9') + 'e-9'));
     tradeList.push({
       exOrderId  : trade[0],
       exTradeId  : trade[1],
@@ -18,8 +19,8 @@ module.exports.parseBitbankTradeHistory = function(hist) {
       amount     : Number(trade[4]),
       feeCcy     : baseCcy,
       fee        : Number(trade[6]),
-      total      : trade[4] * trade[5],
-      ex         : "bitbank",
+      total      : total,
+      ex         : "Bitbank",
     });
   });
   return tradeList;

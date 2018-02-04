@@ -10,28 +10,34 @@ module.exports.parseCoincheckTradeHistory = function(hist) {
   const tradeList = [];
   let tmpRow;
   buySellTrade.forEach(row => {
+    row = row.split(/\t|,/);
+    let isValidFormat = true;
+    const tradeDateUnixTime = Date.parse(row[1]);
+    if (!tradeDateUnixTime || isNaN(tradeDateUnixTime)) isValidFormat = false;
+    if (!row[3].match(/^[-0-9.]{1,}$/)) isValidFormat = false;
+    if (!isValidFormat) throw new Error(`Invalid data format!: ${row}`);
     if (!tmpRow) {
       tmpRow = row;
       return;
     }
-    let [base, counter] = [row, tmpRow].map((i) => i.split(/\t|,/))
-    if (base[4] === 'JPY') {
+    let [base, counter] = [row, tmpRow];
+    if (base[4] === 'JPY' || (base[4] === 'BTC' && counter[4] !== 'JPY')) {
       let tmp = base;
       base = counter;
       counter = tmp;
     }
-    const tradeDateUnixTime = Date.parse(base[1]);
-    if (isNaN(tradeDateUnixTime)) throw new Error(`Invalid input: "${base}"`);
+    let price = counter[3]/base[3];
+    price = Math.abs(Number(Math.round(price + 'e9') + 'e-9'));
     tradeList.push({
       exTradeId  : `${base[0].trim()},${counter[0].trim()}`,
       tradeDate  : new Date(tradeDateUnixTime),
       side       : counter[3] <= 0 ? "B": "S",
-      price      : Math.abs(counter[3]/base[3]),
+      price      : price,
       counterCcy : counter[4],
       baseCcy    : base[4],
       amount     : Math.abs(base[3]),
       total      : Math.abs(counter[3]),
-      ex         : "cc",
+      ex         : "Coincheck",
     });
     tmpRow = undefined;
   });

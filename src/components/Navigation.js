@@ -33,7 +33,7 @@ class Navigation extends Component {
       <div className="nav-container">
         <div className="container">
           <ul className='inline-list hover-links nav-list twelve columns'>
-            <li><Link to="/" className='text-lg'>Cointaxpay</Link></li>
+            <li><Link to="/" className='text-lg'>Cointaxpay(β)</Link></li>
             {linkListToApped}
           </ul>
         </div>

@@ -21,9 +21,9 @@ const EXCHANGES = [
     howtoImport: (
       <div className="alert">
         [How to]<br />
-        WebブラウザでZaifにログインし、取引履歴をコピーして貼り付けてください。<br />
+        Zaifからダウンロードした取引履歴CSVの内容をコピーして貼り付けてください。<br />
         [Format]<br />
-        注文	価格	数量	手数料	ボーナス	日時<br />
+        "マーケット","取引種別","価格","数量","取引手数料","ボーナス円","日時","コメント"<br />
         * Tab区切り、またはカンマ区切り
       </div>
     ),
@@ -95,7 +95,6 @@ class ImportTrade extends Component {
     }
     try {
       let trades = parser(e.target.value) || [];
-      console.log(trades);
       const filtered = trades.filter((t) => {
         return String(t['tradeDate'].getFullYear()) === String(this.props.year);
       });
@@ -104,10 +103,11 @@ class ImportTrade extends Component {
       } else {
         this.setState({trades: filtered});
       }
+      if (trades.length === 0 && e.target.value) {
+        this.setState({error: "有効なデータを入力してください。"});
+      }
     } catch (e) {
-      this.setState({error: "有効なデータを入力してください"});
-      console.log(e);
-      console.log(e.message);
+      this.setState({error: "有効なデータを入力してください。" + e.message});
     }
   }
 

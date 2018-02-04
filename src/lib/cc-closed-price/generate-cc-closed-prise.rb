@@ -24,8 +24,6 @@ end
 
 File.open(OUT_FILE, "w") do |f|
   js =<<EOF
-'use strict';                                                                                                                                                 
-
 let data = JSON.parse('%s');
 function formatDate (date, format) {
   format = format.replace(/yyyy/g, date.getFullYear());
@@ -38,8 +36,7 @@ function formatDate (date, format) {
   return format;
 };
 
-var module = module.exports = {}; 
-module.exports.fetchClosedPrice (date, ccy) {
+module.exports.fetchClosedPrice = function fetchClosedPrice(date, ccy) {
   ccy = ccy.toLowerCase();
   return data[formatDate(date, 'yyyy-MM-dd')][ccy][1];
 }

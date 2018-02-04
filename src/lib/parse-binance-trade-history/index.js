@@ -35,7 +35,7 @@ module.exports.parseBinanceTradeHistory = function(hist) {
       feeCcy     : trade[7],
       fee        : Number(trade[6]),
       total      : Number(trade[5]),
-      ex         : "binance",
+      ex         : "Binance",
     });
   });
   return tradeList;

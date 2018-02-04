@@ -3,11 +3,11 @@ import {Route, Switch} from 'react-router-dom';
 
 import './App.css';
 import SignUp from './SignUp';
-import SignOut from './SignOut';
 import SignUpConfirm from './SignUpConfirm';
 import SignUpSuccess from './SignUpSuccess';
 import SignIn from './SignIn';
 import SignInCheck from './SignInCheck';
+import Account from './Account';
 import Landing from './Landing';
 import Navigation from './Navigation';
 import EditTrades from './EditTrades';
@@ -19,9 +19,9 @@ const App = () => {
       <Switch>
         <Route path='/' exact component={Landing} />
         <Route path='/edit-trades' exact component={EditTrades} />
+        <Route path='/account' component={Account} />
         <Route path='/signin' component={SignIn} />
         <Route path='/signup' component={SignUp} />
-        <Route path='/signout' component={SignOut} />
         <Route path='/signup-confirm' component={SignUpConfirm} />
         <Route path='/signup-success' component={SignUpSuccess} />
       </Switch>

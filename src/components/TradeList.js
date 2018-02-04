@@ -60,8 +60,8 @@ class TradeList extends Component {
           <td className="number-text">{trade.total}</td>
           <td>{trade.ex}</td>
           {Number(trade.pl) === 0 ?
-            <td className="number-text">{trade.pl}</td> : trade.pl < 0 ?
-            <td className="red-text number-text">{trade.pl}</td> :
+            <td className="number-text">{trade.pl}</td> : trade.pl > 0 ?
+            <td className="red-text number-text">+{trade.pl}</td> :
             <td className="green-text number-text">{trade.pl}</td>
           }
           {trade.baseAfterBalance ?
@@ -110,7 +110,7 @@ class TradeList extends Component {
                <th>取引前平均単価(決済側)</th>
              }
              {this.props.type === "pl-detail" &&
-               <th>決済通貨単価(円)</th>
+               <th>決済通貨市場価格(円)</th>
              }
            </tr>
           </thead>

@@ -21,7 +21,7 @@ class Navigation extends Component {
     if (this.state.signedIn) {
       linkListToApped = [
         <li key="0"><Link to="/edit-trades/">取引データ登録・編集</Link></li>,
-        <li key="1"><Link to="/signout/">サインアウト</Link></li>,
+        <li key="1"><Link to="/account/">アカウント</Link></li>,
       ];
     } else {
       linkListToApped = [

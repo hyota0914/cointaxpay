@@ -23,6 +23,11 @@ EditDataStorage.fetchEditData = function(key) {
   });
 };
 
+EditDataStorage.clear = function() {
+  const ls = require('storage2').sessionStorage;
+  ls.clear();
+}
+
 EditDataStorage.saveEditData = function(key, editData) {
   return new Promise((resolve, reject) => {
     try {

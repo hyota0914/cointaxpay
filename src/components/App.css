@@ -4,12 +4,27 @@
 body{
   font-family: 'Raleway', san-serif;
 }
+.success-message {
+  background-color: #ccffff;
+  margin-bottom: 10px;
+}
+.loading-center {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 2048;
+  margin-top: -17px;
+  margin-left: -17px;
+}
 .margin-left-10 {
   margin-left: 10px;
 }
 .number-text {
   font-family: 'Josefin Sans', san-serif !important;
   text-align: right;
+}
+.horizontal-spacer-opaque {
+  height: 10px;
 }
 .filter-input {
   margin-left: 8px;
@@ -33,6 +48,11 @@ body{
   line-height: 24px;
   background-color: #888;
   color: #fff;
+}
+.flat-button {
+  height: 24px;
+  margin: 0 0 0 8px;
+  line-height: 24px;
 }
 .nav-container {
   background: #666;

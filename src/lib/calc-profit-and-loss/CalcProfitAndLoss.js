@@ -14,10 +14,6 @@ function round(num, digits) {
   return Number(Math.round(`${num}e${digits}`) + `e-${digits}`);
 }
 
-function floor(num) {
-  return Number(Math.trunc(num));
-}
-
 const fetchMarketPrice = (function() {
   const useMarketRateInCoincheck = [
     'BTC',
@@ -150,23 +146,54 @@ const sortTradeByDateAsc = (t1, t2) => {
   return id1<id2 ? -1 : id1>id2 ? 1: 0;
 };
 
-function calcTotalProfitAndLoss(trades) {
-  return trades.reduce((current, t) => {
-    current.latest += t.pl;
-    return current;
-  }, {
-    latest: 0,
-    history: [
-    ],
-  });
-}
-
-module.exports = function calcProfitAndLoss(trades, initialBalance) {
+module.exports.calcProfitAndLoss = (trades, initialBalance) => {
   let balance = initialBalance || [];
   trades.sort(sortTradeByDateAsc);
   trades = trades.map((trade) => {
     [trade, balance] = calcProfitAndLossPerTrade(trade, balance);
     return trade;
   });
-  return [trades, balance, calcTotalProfitAndLoss(trades)];
+  return [trades, balance];
 }
+
+module.exports.calcTotalProfitAndLoss = (year, trades) => {
+  try {
+    trades.sort(sortTradeByDateAsc);
+    const history = (() => {
+      const set = {}
+      const dt = new Date(`${year}-01-01 00:00:00 GMT+0900`);
+      while (dt.getFullYear() === Number(year)) {
+        set[dt.getTime()] = {pl: 0, total: 0};
+        dt.setTime(dt.getTime() + 1000*60*60*24);
+      }
+      return set;
+    })();
+    const plTotal = trades.reduce((current, t) => {
+      let dt = new Date(t.tradeDate);
+      dt = new Date(dt.getTime() + (dt.getTimezoneOffset()*60*1000))
+      dt = new Date(`${dt.getUTCFullYear()}-${dt.getUTCMonth() + 1}-${dt.getUTCDate()} GMT+0900`);
+      current.latest += t.pl || 0;
+      history[dt.getTime()].pl += t.pl || 0;
+      return current;
+    }, {
+      latest: 0,
+    });
+    plTotal.history = Object.keys(history).map((k) => ({
+      date: new Date(Number(k)), 
+      pl: round(history[k].pl, 9), 
+    }));
+    plTotal.history.sort((a,b) => a.date.getTime() < b.date.getTime() ? -1 : 1);
+    plTotal.history = plTotal.history.map((r, idx) => {
+      r.total = r.pl;
+      if (idx !== 0) {
+        r.total = round(r.total + plTotal.history[idx-1].total, 9);
+      }
+      return r;
+    });
+    return plTotal;
+  } catch (e) {
+    console.log(e);
+    return {};
+  }
+}
+

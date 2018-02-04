@@ -69,6 +69,29 @@ AmazonAuth.signOut = function() {
   }
 }
 
+// https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/using-amazon-cognito-user-identity-pools-javascript-examples.html
+AmazonAuth.getUserAttributes = function() {
+  return new Promise((resolve, reject) => {
+    const cognitoUser = getUserPool().getCurrentUser();
+    cognitoUser.getSession(function(err, session) {
+      if (err) {
+        reject(err);
+      }
+      if (session.isValid() === false) {
+        reject("Session is invalid");
+      }
+      cognitoUser.getUserAttributes((err, result) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(result);
+      });
+    });
+
+  });
+}
+
 // https://github.com/aws/amazon-cognito-identity-js/
 AmazonAuth.confirmAmazonCognitoUser = function(username, code) {
   return new Promise((resolve, reject) => {

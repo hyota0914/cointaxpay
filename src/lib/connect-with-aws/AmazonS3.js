@@ -60,5 +60,5 @@ AmazonS3.fetchMetaDataFromAmazonS3 = function(key) {
 }
 
 
-export default TradeData;
+export default AmazonS3;
 

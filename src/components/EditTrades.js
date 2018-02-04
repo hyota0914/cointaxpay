@@ -3,13 +3,18 @@ import EditDataStorage from '../lib/manage-edit-data/EditDataStorage';
 import TradeList from './TradeList';
 import SelectYear from './SelectYear';
 import ImportTrade from './ImportTrade';
-import calcProfitAndLoss from '../lib/calc-profit-and-loss/CalcProfitAndLoss';
+import PlTotal from './PlTotal';
+import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
+import AmazonS3 from '../lib/connect-with-aws/AmazonS3';
+import { ScaleLoader } from 'react-spinners';
 
 const VIEWS = {
   TRADE_LIST: 'trade-list',
   SELECT_YEAR: 'select-year',
   IMPORT_TRADE: 'import-trades',
   PL_DETAIL: 'pl-detail',
+  PL_TOTAL: 'pl-total',
+  BALANCE: 'balance',
 }
 const EDIT_DATA_STORAGE_KEY = 'TRADE_EDIT_DATA';
 const DEFAULT_YEAR = '2017';
@@ -49,6 +54,13 @@ class EditTrades extends Component {
       error: null,
       tradeSorter: sortTradeByDateDesc,
       page: 0,
+      loading: false,
+      download: {
+        data: null,
+        name: null,
+      },
+      saveS3Disabled: false,
+      loadS3Disabled: false,
       filterCondition: {
         ccy: null,
         month: null,
@@ -77,17 +89,124 @@ class EditTrades extends Component {
   }
 
   handleSwithView(e) {
+    if (e.target.name === VIEWS.SELECT_YEAR) {
+      if (!window.confirm(`対象の年度を切りかえると編集中データは消去されます。\
+保存する場合は「データ保存」を行ってください。よろしいですか？`)) {
+        return;
+      }
+    }
     this.setState({
       view: e.target.name,
     });
   }
 
+  setS3ButtonDisabled(disabled) {
+    this.setState({
+      saveS3Disabled: disabled,
+      loadS3Disabled: disabled,
+    });
+  }
+
   handleSaveCloud(e) {
-    // TODO:
+    if (!window.confirm(`${this.state.year}年度のデータをクラウドに保存します。旧データは上書きされます。よろしいですか？`)) {
+      return;
+    }
+    this.setS3ButtonDisabled(true);
+    const editData = this.state.editData;
+    if (!editData || !editData.year) {
+      this.setState({error: 'エラーが発生しました。'});
+      return;
+    }
+    if (editData.trades.length === 0) {
+      if (!window.confirm(`データが空です。このまま保存してよろしいですか？`)) {
+        return;
+      }
+    }
+    const err = (e) => {
+      this.setS3ButtonDisabled(false);
+      this.setState({
+        error: 'クラウドへの保存に失敗しました。:' + e.message,
+        loading: false,
+      });
+    };
+    this.setState({loading: true});
+    try {
+      AmazonAuth.refresh().then(() => {
+        AmazonS3.saveDataToAmazonS3(`edit_${this.state.editData.year}.json`, this.state.editData)
+          .then(() => {
+            this.setS3ButtonDisabled(false);
+            this.setState({
+              success: 'クラウドに保存しました。',
+              loading: false,
+            });
+          })
+          .catch((e) => {
+            err(e);
+          });
+      }).catch((e) => {
+        err(e);
+      });
+    } catch (e) {
+      err(e);
+    }
+  }
+
+  byteToString(bytes) {
+    let result = "";
+    let index = 0;
+    const CHUNK_SIZE = 0x0001;
+    while (index < bytes.length) {
+      let slice = bytes.slice(index, Math.min(index + CHUNK_SIZE, bytes.length));
+      result += String.fromCharCode.apply(null, slice);
+      index += CHUNK_SIZE;
+    }
+    return result;
   }
 
   handleLoadCloud(e) {
-    // TODO:
+    if (!window.confirm(`${this.state.year}年度のデータをクラウドから読み込みます。編集中データは上書きされます。よろしいですか？`)) {
+      return;
+    }
+    this.setS3ButtonDisabled(true);
+    this.setState({loading: true});
+    const err = (e) => {
+      console.log(e);
+      this.setS3ButtonDisabled(false);
+      this.setState({
+        error: 'クラウドからのデータ読み込みに失敗しました。:' + e.message,
+        loading: false,
+      });
+    };
+    try {
+      AmazonAuth.refresh().then(() => {
+        AmazonS3.fetchDataFromAmazonS3(`edit_${this.state.editData.year}.json`)
+          .then((data) => {
+            const editDataNew = JSON.parse(this.byteToString(data));
+            if (!editDataNew.year || !editDataNew.trades) {
+              throw new Error('Invalid data format!');
+            }
+            EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, editDataNew)
+              .then(() => {
+                this.setS3ButtonDisabled(false);
+                this.setState({
+                  editData: editDataNew,
+                  success: 'クラウドからデータを読み込みました。',
+                  loading: false,
+                });
+              })
+              .catch((e) => {
+                err(e)
+              });
+          })
+          .catch((e) => {
+            err(e);
+          });
+      }).catch((e) => {
+        err(e);
+      });
+    } catch (e) {
+      err(e);
+    }
   }
 
   handleClear(e) {
@@ -167,9 +286,11 @@ class EditTrades extends Component {
   handleCalcProfitAndLoss(e) {
     if (window.confirm(`${this.state.year}年度の損益計算を行います。よろしいですか？`)) {
       try {
-        let [tradesNew, balanceNew, totalProfitAndLoss] = calcProfitAndLoss(this.state.editData.trades, []);
+        let fn = require('../lib/calc-profit-and-loss/CalcProfitAndLoss').calcProfitAndLoss;
+        let [tradesNew, balanceNew] = fn(this.state.editData.trades, []);
         const editData = this.state.editData;
         editData.trades = tradesNew;
+        editData.balance = balanceNew;
         EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, this.state.editData)
           .then(() => {
             this.setState({
@@ -180,9 +301,7 @@ class EditTrades extends Component {
           .catch((err) => {
             this.setState({error: 'データ保存に失敗しました。:' + err.message});
           });
-        console.log(this.state.editData.trades);
-        console.log(balanceNew);
-        console.log(totalProfitAndLoss);
+        console.log(this.state.editData);
       } catch (e) {
         this.setState({error: 'エラーが発生しました。:' + e.message});
         console.log(e);
@@ -193,6 +312,63 @@ class EditTrades extends Component {
   handleSwitchPage(e) {
     e.preventDefault();
     this.setState({page: Number(e.target.name)});
+  }
+
+  handleGenerateCSV(e) {
+    const download = this.state.download;
+    let data = [[
+      'id',
+      '取引日付',
+      '売/買',
+      '主軸通貨',
+      '決済通貨',
+      '価格',
+      '数量',
+      '合計',
+      '取引所',
+      '損益',
+      '取引後残高',
+      '取引後平均原価',
+      '取引前残高',
+      '取引前平均単価',
+      '取引後残高(決済側)',
+      '取引後平均単価(決済側)',
+      '取引前残高(決済側)',
+      '取引前平均単価(決済側)',
+      '決済通貨市場価格(円)',
+    ]];
+    this.state.editData.trades.forEach((t) => {
+      data.push([
+        t.rowId,
+        t.tradeDate,
+        t.side === "B" ? "BUY" : "SELL",
+        t.baseCcy,
+        t.counterCcy,
+        t.price,
+        t.amount,
+        t.total,
+        t.ex,
+        t.pl,
+        t.baseAfterBalance ? t.baseAfterBalance.amount : "",
+        t.baseAfterBalance ? t.baseAfterBalance.priceJpy : "",
+        t.baseBeforeBalance ? t.baseBeforeBalance.amount : "",
+        t.baseBeforeBalance ? t.baseBeforeBalance.priceJpy : "",
+        t.counterAfterBalance ? t.counterAfterBalance.amount : "",
+        t.counterAfterBalance ? t.counterAfterBalance.priceJpy : "",
+        t.counterBeforeBalance ? t.counterBeforeBalance.amount : "",
+        t.counterBeforeBalance ? t.counterBeforeBalance.priceJpy : "",
+        t.counterCcyMarketPrice,
+      ]);
+    });
+    console.log(data);
+    let csv = "";
+    data.forEach((r) => {
+      csv += r.join(',');
+      csv += '\n';
+    });
+    download.data = encodeURI(csv);
+    download.name = `cointaxpay_pl_data_${this.state.year}.csv`;
+    this.setState({download: download});
   }
 
   onSelectYear(year) {
@@ -290,6 +466,12 @@ class EditTrades extends Component {
     this.state.error = null;
     return (
       <div className="container">
+        <div className='sweet-loading loading-center'>
+          <ScaleLoader
+            color={'#66cc99'}
+            loading={this.state.loading}
+          />
+        </div>
         <div className="row">
           取引データ編集
           <select className="margin-left-10">
@@ -311,6 +493,9 @@ class EditTrades extends Component {
           <button className="button float-button" name={VIEWS.PL_DETAIL} onClick={
             this.handleSwithView.bind(this)
           }>損益詳細</button>
+          <button className="button float-button" name={VIEWS.PL_TOTAL} onClick={
+            this.handleSwithView.bind(this)
+          }>損益トータル</button>
           <button className="button float-button" name={VIEWS.SELECT_YEAR} onClick={
             this.handleSwithView.bind(this)
           }>年度切替え</button>
@@ -327,7 +512,7 @@ class EditTrades extends Component {
           }>編集データ消去(Local)</button>
         </div>
         {success &&
-          <div className="row">
+          <div className="row success-message">
             <div className="green-text">
               {success}
             </div>
@@ -340,6 +525,11 @@ class EditTrades extends Component {
             </div>
           </div>
         }
+        {this.state.view === VIEWS.PL_TOTAL &&
+          <PlTotal data={
+            require('../lib/calc-profit-and-loss/CalcProfitAndLoss')
+              .calcTotalProfitAndLoss(this.state.editData.year, this.state.editData.trades)
+          } />}
         {(this.state.view === VIEWS.TRADE_LIST || this.state.view === VIEWS.PL_DETAIL) && (
           <div>
             <div className="row">
@@ -358,6 +548,14 @@ class EditTrades extends Component {
               <button className="button float-button sort-button" name="asc" onClick={
                 this.handleSortByDate.bind(this)
               }>日付昇順</button>
+              <button className="button float-button flat-button" onClick={
+                this.handleGenerateCSV.bind(this)
+              }>CSV作成</button>
+              {this.state.download.data && (
+                <a className="button float-button flat-button" href={
+                  `data:text/csv;charset=utf-8,${this.state.download.data}`
+                } target='_blank' download={this.state.download.name} >CSVダウンロード</a>
+              )}
             </div>
             <div className="row">
               {pages}

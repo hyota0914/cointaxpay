@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
 import EditDataStorage from '../lib/manage-edit-data/EditDataStorage';
+import { ScaleLoader } from 'react-spinners';
 
 class Account extends Component {
   constructor(props) {
@@ -11,7 +12,16 @@ class Account extends Component {
       email: null,
       emailVerified: null,
       error: null,
+      loading: false,
     }
+    err = (e) => {
+      console.log(e);
+      this.setState({
+        error: "エラーが発生しました。:" + e.message,
+        loading: false,
+      });
+    };
+    this.setState({loading: true});
     AmazonAuth.refresh().then(() => {
       AmazonAuth.getUserAttributes().then((result) => {
         this.setState({username: AmazonAuth.getUsername()});
@@ -25,11 +35,16 @@ class Account extends Component {
         });
       }).catch((e) => {
         console.log(e);
-        this.setState({error: "エラーが発生しました。:" + e.message});
+        this.setState({
+          error: "エラーが発生しました。:" + e.message,
+          loading: false,
+        });
       });
     }).catch((e) => {
-      console.log(e);
-      this.setState({error: "エラーが発生しました。:" + e.message});
+      this.setState({
+        error: "エラーが発生しました。:" + e.message,
+        loading: false,
+      });
     });
   }
 
@@ -48,6 +63,12 @@ class Account extends Component {
   render() {
     return (
       <div className="container">
+        <div className='sweet-loading loading-center'>
+          <ScaleLoader
+            color={'#66cc99'}
+            loading={this.state.loading}
+          />
+        </div>
         <div className="row">
           <div className="row">
             <div className="six columns">

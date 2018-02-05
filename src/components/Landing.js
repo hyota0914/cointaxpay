@@ -1,40 +1,71 @@
 import React from 'react';
 
-const Landing = () => (
-  // TODO: Need to brush up landing page
-  <div className="container">
-    <div>
-      <b>[説明]</b><br />
-      各取引所の取引履歴を一括で登録し、税金計算のための損益を自動計算するツールです。<br />
-      損益計算は総平均法で行います。<br />
+const Landing = () => {
+  return (
+    <div className="container">
+      <div>
+        <h1>Cointaxpay</h1>
+        <div className="u-full-width">
+          仮想通貨の損益計算に困っている人たちに使ってもらうためのアプリケーションとなります。簡単な操作で年間でどれだけの利益・損失があったかを一瞬で計算できます。ベータ版となりますが、ぜひお試しください。バグ報告、ご質問、ご要望がありましたら、ツイッターアカウントまでお知らせください。
+        </div>
+        <div className="row">
+          <h2>機能と特徴</h2>
+        </div>
+      </div>
+      <div className="row">
+        <div className="six columns">
+          <div>
+            <h3>取引履歴の一括インポート機能</h3>
+          </div>
+          <div>
+            各取引所の取引履歴を一括で登録する機能です。現在Zaif、コインチェック、Bitbank、Binanceに対応しております。
+          </div>
+        </div>
+        <div className="six columns">
+          <div>
+            <h3>日次損益の計算機能</h3>
+          </div>
+          <div>
+            取引登録後、年間の損益を日単位で計算する機能です。損益の計算には、コインチェック社が公開している日別終値を利用します。各通貨の取得原価は総平均法で計算します。
+          </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="six columns">
+          <div>
+            <h3>計算結果のダウンロード機能</h3>
+          </div>
+          <div>
+            損益計算結果をCSVファイルでダウンロードする機能です。Excelなどのスプレッドシートでの検算・修正などにご利用ください。
+          </div>
+        </div>
+        <div className="six columns">
+          <div>
+            <h3>利用料金</h3>
+          </div>
+          <div>
+            利用料金は無料です。
+          </div>
+        </div>
+      </div>
+      <div>
+        <div className="row">
+          <h2>対応取引所</h2>
+        </div>
+        <div className="twelve columns u-full-width">
+          現時点でZaif, Binance, Coincheck, Bitbankに対応しています。
+        </div>
+      </div>
+      <div>
+        <div className="row">
+          <h2>ご注意事項</h2>
+        </div>
+        <div className="twelve columns u-full-width">
+          Cointaxpay(β)は試作段階のアプリとなります。ご利用は自己責任でお願いいたします。何らかの損害が生じたとしても一切責任は負えません。確定申告の際には、計算結果を十分ご確認ください。
+        </div>
+      </div>
     </div>
-    <br />
-    <div>
-      <b>[利用料金]</b><br />
-      無料です。
-    </div>
-    <br />
-    <div>
-      <b>[対応取引所]</b><br />
-      ・Zaif<br/>
-      ・Binance<br/>
-      ・Coincheck<br/>
-      ・Bitbank<br/>
-    </div>
-    <br />
-    <div>
-      <b>[計算方法]</b><br />
-      総平均法にて損益を計算します。コイン同士の取引損益は下記のレートを用いて計算します。<br />
-      ・コインチェックが公開している各コインの終値
-    </div>
-    <br />
-    <div>
-      <b>[注意]</b><br />
-      Cointaxpay(β)はベータ版です。ご利用は自己責任でお願いいたします。<br />
-      仮に本ソフトを利用することにより、何らかの損害が生じたとしても一切責任は負えません。<br />
-      確定申告の際には、計算結果を十分ご確認ください。<br />
-    </div>
-  </div>
-)
+  );
+}
 
 export default Landing;

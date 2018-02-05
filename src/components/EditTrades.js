@@ -17,7 +17,6 @@ const VIEWS = {
   BALANCE: 'balance',
 }
 const EDIT_DATA_STORAGE_KEY = 'TRADE_EDIT_DATA';
-const DEFAULT_YEAR = '2017';
 const COUNT_PER_PAGE = 30;
 
 const sortTradeByDateDesc = (t1, t2) => { 
@@ -46,10 +45,11 @@ class EditTrades extends Component {
 
   constructor(props) {
     super(props);
+    const defaultYear = (new Date(Date.now())).getFullYear() - 1;
     this.state = {
       view: VIEWS.TRADE_LIST,
       editData: null,
-      year: DEFAULT_YEAR,
+      year: defaultYear,
       success: null,
       error: null,
       tradeSorter: sortTradeByDateDesc,
@@ -125,7 +125,7 @@ class EditTrades extends Component {
     const err = (e) => {
       this.setS3ButtonDisabled(false);
       this.setState({
-        error: 'クラウドへの保存に失敗しました。:' + e.message,
+        error: 'クラウドへの保存に失敗しました。',
         loading: false,
       });
     };
@@ -173,7 +173,7 @@ class EditTrades extends Component {
       console.log(e);
       this.setS3ButtonDisabled(false);
       this.setState({
-        error: 'クラウドからのデータ読み込みに失敗しました。:' + e.message,
+        error: 'クラウドからのデータ読み込みに失敗しました。',
         loading: false,
       });
     };
@@ -299,7 +299,7 @@ class EditTrades extends Component {
             });
           })
           .catch((err) => {
-            this.setState({error: 'データ保存に失敗しました。:' + err.message});
+            this.setState({error: 'データ保存に失敗しました。' + err.message});
           });
         console.log(this.state.editData);
       } catch (e) {
@@ -578,7 +578,6 @@ class EditTrades extends Component {
       </div>
     );
   }
-
 }
 
 export default EditTrades;

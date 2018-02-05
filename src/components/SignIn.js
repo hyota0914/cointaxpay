@@ -1,13 +1,22 @@
 import React, { Component } from 'react';
-import { Redirect, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { ScaleLoader } from 'react-spinners';
+
 import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
+import SignUpConfirm from './SignUpConfirm';
 
 class SignIn extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
+      error: '',
       username: '',
       password: '',
+      needMailAddressConfirmed: false,
+      loading: false,
+      signinSuccess: require('querystring').parse(
+        window.location.search.slice(1))['signin-success'] === 'true',
     };
   }
 
@@ -21,34 +30,65 @@ class SignIn extends Component {
         break;
       default:
     }
+    this.setState({
+      error: '',
+    });
   }
 
   handleSignIn(e) {
     e.preventDefault();
+    this.setState({loading: true});
     AmazonAuth.authenticateAmazonCognitoUser(this.state.username, this.state.password)
       .then(() => {
-        this.setState({success: true});
+        window.location.href = "/?succeed-signin=true";
       })
       .catch((err) => {
         if (err.message.match(/.*confirmed.*/)) {
-          this.setState({notConfirmed: true});
+          this.setState({
+            error: '',
+            needMailAddressConfirmed: true,
+          });
+        } else {
+          this.setState({
+            error: "認証に失敗しました。ユーザ名、パスワードをご確認ください。",
+            loading: false,
+          });
         }
-        this.setState({error: err.message});
       });
   }
 
+  onMailAddressConfirmed() {
+    window.location.href = "/?succeed-signup=true";
+  }
+
   render() {
-    if (this.state.notConfirmed) {
+    if (this.state.needMailAddressConfirmed) {
       return (
-        <Redirect to='/signup-confirm/' />
+        <SignUpConfirm onMailAddressConfirmed={
+          this.onMailAddressConfirmed.bind(this)
+        } username={this.state.username} />
       );
     }
-    if (this.state.success) {
-      window.location.href = "/";
+    if (this.state.signinSuccess) {
+      let hello = AmazonAuth.getUsername() ? `こんにちは、${AmazonAuth.getUsername()}さん！` :
+        "こんにちは！";
+      return (
+        <div className="container">
+          <div className="alert">
+            {hello}<br />
+            <Link to="/edit-trades/">こちら</Link>から取引履歴を登録してください。
+          </div>
+        </div>
+      )
     }
-
     return (
       <div className="container">
+        <div className='sweet-loading loading-center'>
+          <ScaleLoader
+            color={'#66cc99'}
+            loading={this.state.loading}
+          />
+        </div>
         <div className="alert">
           サインインしてください。新規登録の場合は<Link to="/signup">こちら</Link>からご登録ください。
         </div>
@@ -69,13 +109,11 @@ class SignIn extends Component {
               </label>
             </div>
           </div>
-          {this.state.error &&
-            <div className="row">
-              <div className="red-text">
-                {this.state.error}
-              </div>
+          <div className="row">
+            <div className="red-text">
+              {this.state.error}
             </div>
-          }
+          </div>
           <div className="row">
             <button className="button" onClick={this.handleSignIn.bind(this)}>SignIn!</button>
           </div>

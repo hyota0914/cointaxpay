@@ -3,8 +3,6 @@ import {Route, Switch} from 'react-router-dom';
 
 import './App.css';
 import SignUp from './SignUp';
-import SignUpConfirm from './SignUpConfirm';
-import SignUpSuccess from './SignUpSuccess';
 import SignIn from './SignIn';
 import SignInCheck from './SignInCheck';
 import Account from './Account';
@@ -22,11 +20,9 @@ const App = () => {
         <Route path='/account' component={Account} />
         <Route path='/signin' component={SignIn} />
         <Route path='/signup' component={SignUp} />
-        <Route path='/signup-confirm' component={SignUpConfirm} />
-        <Route path='/signup-success' component={SignUpSuccess} />
       </Switch>
       <Switch>
-        <Route path='/import' component={SignInCheck} />
+        <Route path='/edit-trades' component={SignInCheck} />
       </Switch>
     </div>
   </div>

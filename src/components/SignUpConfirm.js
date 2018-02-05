@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router-dom';
 
 import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
 
 class SignUpConfirm extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
-      username: AmazonAuth.getUsername(),
-      code: '',
-      resendSuccessNotice: '',
+      success: '',
       error: '',
+      code: '',
+      loading: false,
     };
   }
 
@@ -24,52 +24,52 @@ class SignUpConfirm extends Component {
         break;
       default:
     }
-    this.setState({resendSuccessNotice: null});
+    this.setState({
+      success: '',
+      error: '',
+    });
   }
 
   handleConfirm(e) {
     e.preventDefault();
-    this.setState({resendSuccessNotice: null});
-    AmazonAuth.confirmAmazonCognitoUser(this.state.username, this.state.code)
+    this.setState({loading: true});
+    AmazonAuth.confirmAmazonCognitoUser(this.props.username, this.state.code)
       .then(() => {
-        this.setState({isConfirmed: true});
+        this.props.onMailAddressConfirmed();
       })
       .catch((err) => {
-        this.setState({error: err.message});
+        this.setState({
+          error: "確認に失敗しました。コードを再度お確かめください。",
+          loading: false,
+        });
       });
   }
 
   handleResend(e) {
     e.preventDefault();
+    this.setState({loading: true});
     AmazonAuth.resendConfirmationCode(this.state.username)
       .then(() => {
-        this.setState({resendSuccessNotice: "確認コードを再送しました！"});
+        this.setState({
+          resendSuccess: "確認コードを再送しました！",
+          loading: false,
+        });
       })
       .catch((err) => {
-        this.setState({error: err.message});
+        this.setState({
+          error: "再送に失敗しました。",
+          loading: false,
+        });
       });
   }
 
   render() {
-    if (this.state.isConfirmed) {
-      return (
-        <Redirect to='/signin' />
-      );
-    }
     return (
       <div className="container">
         <div className="alert">
           確認のため、メールで送信された確認コード６桁を入力してください
         </div>
         <form>
-          <div className="row">
-            <div className="six columns">
-              <label>
-                ユーザー名
-                <input className="u-full-width" type="text" name="username" defaultValue={this.state.username} onChange={this.handleUpdate.bind(this)} />
-              </label>
-            </div>
-          </div>
           <div className="row">
             <div className="three columns">
               <label>
@@ -88,10 +88,10 @@ class SignUpConfirm extends Component {
           <div className="row">
             <button className="button" onClick={this.handleConfirm.bind(this)}>Confirm!</button>
           </div>
-          {this.state.resendSuccessNotice &&
+          {this.state.resendSuccess &&
             <div className="row">
               <div className="green-text">
-                {this.state.resendSuccessNotice}
+                {this.state.resendSuccess}
               </div>
             </div>
           }

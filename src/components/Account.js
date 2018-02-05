@@ -8,23 +8,21 @@ class Account extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: null,
-      email: null,
-      emailVerified: null,
+      username: "",
+      email: "",
+      emailVerified: "",
       error: null,
-      loading: false,
+      loading: true,
     }
-    err = (e) => {
+    const err = (e) => {
       console.log(e);
       this.setState({
         error: "エラーが発生しました。:" + e.message,
         loading: false,
       });
     };
-    this.setState({loading: true});
     AmazonAuth.refresh().then(() => {
       AmazonAuth.getUserAttributes().then((result) => {
-        this.setState({username: AmazonAuth.getUsername()});
         result.forEach((attr) => {
           if (attr.Name === 'email') {
             this.setState({email: attr.Value});
@@ -33,18 +31,15 @@ class Account extends Component {
             this.setState({emailVerified: attr.Value});
           }
         });
-      }).catch((e) => {
-        console.log(e);
         this.setState({
-          error: "エラーが発生しました。:" + e.message,
+          username: AmazonAuth.getUsername(),
           loading: false,
         });
+      }).catch((e) => {
+        err(e);
       });
     }).catch((e) => {
-      this.setState({
-        error: "エラーが発生しました。:" + e.message,
-        loading: false,
-      });
+      err(e);
     });
   }
 
@@ -55,6 +50,7 @@ class Account extends Component {
     EditDataStorage.clear();
     if (AmazonAuth.isSignedIn()) {
       const ls = require('storage2').sessionStorage;
+      ls.clear();
       AmazonAuth.signOut();
       window.location.href = "/";
     }
@@ -90,7 +86,9 @@ class Account extends Component {
             <div className="six columns">
               <label>
                 メールアドレス確認
-                <input className="u-full-width" type="text" name="username" value={this.state.emailVerified} readOnly />
+                <input className="u-full-width" type="text" name="username" value={
+                  this.state.emailVerified ? "確認済み" : "未確認"
+                } readOnly />
               </label>
             </div>
           </div>

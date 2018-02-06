@@ -9,14 +9,14 @@ describe("Parse Coincheck Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      exTradeId  : 'AO53899xxxx,AO53899xxxx',
-      tradeDate  : new Date(1497311036000),
-      side       : "B",
-      price      : 46936.17647058824,
-      counterCcy : "JPY",
-      baseCcy    : "ETH",
-      amount     : 17.0,
-      total      : 797915,
+      tradeDate: new Date("2017-06-12 23:43:56 UTC"),
+      side: "B",
+      price: 46936.176470588,
+      counterCcy: "JPY",
+      baseCcy: "ETH",
+      amount: 17.0,
+      total: 797915,
+      ex : 'Coincheck',
     });
   });
 
@@ -30,14 +30,17 @@ describe("Parse Coincheck Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      exTradeId  : 'AOxxx490900,AOxxx490901',
-      tradeDate  : new Date(1497481893000),
-      side       : "S",
-      price      : 37403.88229776245,
-      counterCcy : "JPY",
-      baseCcy    : "ETH",
-      amount     : 35.22244,
-      total      : 1317456,
+      tradeDate: new Date("2017-06-14 23:11:33 UTC"),
+      side: "S",
+      price: 37403.882297762,
+      counterCcy: "JPY",
+      baseCcy: "ETH",
+      amount: 35.22244,
+      total: 1317456,
+      ex : 'Coincheck',
     });
   });
+
+  // Needs more tests.
+  
 });

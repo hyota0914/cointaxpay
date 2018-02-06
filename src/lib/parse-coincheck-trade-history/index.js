@@ -1,37 +1,38 @@
 'use strict;'
+
+function isValid(t) {
+  const regNum = new RegExp(/^[-0-9.]{1,}$/);
+  return t.length === 5
+    && !isNaN(Date.parse(t[1]))
+    && (t[2] === "売却" || t[2] === "購入")
+    && t[3].match(regNum)
+    && t[4].match(/[a-zA-Z0-9]+/);
+}
+
 module.exports.parseCoincheckTradeHistory = function(hist) {
-  const buySellTrade = hist.split(/\r|\n/).filter(row => {
-    const trade = row.trim().split(/\t|,/);
-    return trade.length === 5 && trade[2].match(/売却|購入/)
-  });
-  if (buySellTrade.length % 2 !== 0) {
+  const trades = hist.split(/\r|\n/).filter(row => row.match(/.*売却.*|.*購入.*/));
+  if (trades.length % 2 !== 0) {
     throw new Error("Invalid data number!");
   }
-  const tradeList = [];
-  let tmpRow;
-  buySellTrade.forEach(row => {
+  const result = [];
+  let tmp;
+  trades.forEach(row => {
     row = row.split(/\t|,/);
-    let isValidFormat = true;
-    const tradeDateUnixTime = Date.parse(row[1]);
-    if (!tradeDateUnixTime || isNaN(tradeDateUnixTime)) isValidFormat = false;
-    if (!row[3].match(/^[-0-9.]{1,}$/)) isValidFormat = false;
-    if (!isValidFormat) throw new Error(`Invalid data format!: ${row}`);
-    if (!tmpRow) {
-      tmpRow = row;
+    if (!isValid(row)) throw new Error(`Invalid data format!: ${row}`);
+    if (!tmp) {
+      tmp = row;
       return;
     }
-    let [base, counter] = [row, tmpRow];
-    if (base[4] === 'JPY' || (base[4] === 'BTC' && counter[4] !== 'JPY')) {
-      let tmp = base;
-      base = counter;
-      counter = tmp;
+    let base, counter;
+    if (row[2] === '購入' && row[3] > 0) {
+      [base, counter] = [row, tmp];
+    } else {
+      [base, counter] = [tmp, row];
     }
-    let price = counter[3]/base[3];
-    price = Math.abs(Number(Math.round(price + 'e9') + 'e-9'));
-    tradeList.push({
-      exTradeId  : `${base[0].trim()},${counter[0].trim()}`,
-      tradeDate  : new Date(tradeDateUnixTime),
-      side       : counter[3] <= 0 ? "B": "S",
+    let price = Math.abs(Number(Math.round(counter[3]/base[3] + 'e9') + 'e-9'));
+    result.push({
+      tradeDate  : new Date(base[1]),
+      side       : base[2] === '購入' ? "B": "S",
       price      : price,
       counterCcy : counter[4],
       baseCcy    : base[4],
@@ -39,7 +40,7 @@ module.exports.parseCoincheckTradeHistory = function(hist) {
       total      : Math.abs(counter[3]),
       ex         : "Coincheck",
     });
-    tmpRow = undefined;
+    tmp = undefined;
   });
-  return tradeList;
+  return result;
 }

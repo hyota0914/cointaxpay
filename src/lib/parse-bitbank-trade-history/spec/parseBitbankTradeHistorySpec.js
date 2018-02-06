@@ -6,17 +6,16 @@ describe("Parse Bitbank Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      exOrderId  : "6769750",
-      exTradeId  : "2213863",
-      tradeDate  : new Date(1516207490000),
-      side       : "B",
-      price      : 115.500,
-      counterCcy : "JPY",
-      baseCcy    : "XRP",
-      amount     : 7825.4208,
-      feeCcy     : "XRP",
-      fee        : 0,
-      total      : 903836.1024,
+      tradeDate: new Date("2018/01/18 01:44:50"),
+      side: "B",
+      price: 115.500,
+      counterCcy: "JPY",
+      baseCcy: "XRP",
+      amount: 7825.4208,
+      feeCcy: "XRP",
+      fee: 0,
+      total: 903836.1024,
+      ex: "Bitbank",
     });
   });
 
@@ -26,17 +25,16 @@ describe("Parse Bitbank Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      exOrderId  : "1722132",
-      exTradeId  : "490892",
-      tradeDate  : new Date(1513949883000),
-      side       : "S",
-      price      : 245000,
-      counterCcy : "JPY",
-      baseCcy    : "BCC",
-      amount     : 1.7551,
-      feeCcy     : "BCC",
-      fee        : 0,
-      total      : 429999.5,
+      tradeDate: new Date("2017/12/22 22:38:03"),
+      side: "S",
+      price: 245000,
+      counterCcy: "JPY",
+      baseCcy: "BCC",
+      amount: 1.7551,
+      feeCcy: "JPY",
+      fee: 0,
+      total: 429999.5,
+      ex: "Bitbank",
     });
   });
 
@@ -46,18 +44,19 @@ describe("Parse Bitbank Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      exOrderId  : "16515272",
-      exTradeId  : "174209",
-      tradeDate  : new Date(1512304367000),
-      side       : "B",
-      price      : 0.00065087,
-      counterCcy : "BTC",
-      baseCcy    : "MONA",
-      amount     : 54.0757,
-      feeCcy     : "MONA",
-      fee        : 0,
-      total      : 0.035196250859,
+      tradeDate: new Date("2017/12/03 21:32:47"),
+      side: "B",
+      price: 0.00065087,
+      counterCcy: "BTC",
+      baseCcy: "MONA",
+      amount: 54.0757,
+      feeCcy: "MONA",
+      fee: 0,
+      total: 0.035196251,
+      ex: "Bitbank",
     });
   });
+
+  // TODO: Needs more tests.
 
 });

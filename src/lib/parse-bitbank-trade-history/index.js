@@ -1,27 +1,36 @@
 'use strict;'
+
+function isValid(t) {
+  const regNum = new RegExp(/^[-0-9.]{1,}$/);
+  return t.length === 9 
+    && t[2].match(/[a-z0-9]{1,}_[a-z0-9]{1,}/)
+    && (t[3] === "buy" || t[3] === "sell")
+    && t[4].match(regNum)
+    && t[5].match(regNum)
+    && t[6].match(regNum)
+    && !isNaN(Date.parse(t[8]));
+}
+
 module.exports.parseBitbankTradeHistory = function(hist) {
-  const tradeList = [];
+  const result = [];
   hist.split(/\r|\n/).forEach(row => {
-    const trade = row.trim().split(/\t|,/);
-    if (trade.length !== 9 || !trade[2].match(/[a-z]{1,}_[a-z]{1,}/)) return;
-    const [baseCcy, counterCcy] = trade[2].split('_').map(x => x.toUpperCase());
-    const tradeDateUnixTime = Date.parse(trade[8]);
-    if (isNaN(tradeDateUnixTime)) throw new Error(`Invalid input! "${trade}"`);
-    const total = Math.abs(Number(Math.round((trade[4] * trade[5]) + 'e9') + 'e-9'));
-    tradeList.push({
-      exOrderId  : trade[0],
-      exTradeId  : trade[1],
-      tradeDate  : new Date(tradeDateUnixTime),
-      side       : trade[3] === 'buy' ? "B" : "S",
-      price      : Number(trade[5]),
-      counterCcy,
+    if (row.match(/注文ID.*/)) return;
+    const t = row.trim().split(/\t|,/);
+    if (!isValid(t)) throw new Error(`Invalid input! "${t}"`);
+    const total = Math.abs(Number(Math.round((t[4] * t[5]) + 'e9') + 'e-9'));
+    const [baseCcy, counterCcy] = t[2].split('_').map(x => x.toUpperCase());
+    result.push({
+      tradeDate: new Date(t[8]),
+      side: t[3] === 'buy' ? "B": "S",
+      price: Number(t[5]),
       baseCcy,
-      amount     : Number(trade[4]),
-      feeCcy     : baseCcy,
-      fee        : Number(trade[6]),
-      total      : total,
-      ex         : "Bitbank",
+      counterCcy,
+      amount: Number(t[4]),
+      feeCcy: t[3] === 'buy' ? baseCcy : counterCcy,
+      fee: Number(t[6]),
+      total: total,
+      ex: "Bitbank",
     });
   });
-  return tradeList;
+  return result;
 }

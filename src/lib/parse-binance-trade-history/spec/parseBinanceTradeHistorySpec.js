@@ -6,15 +6,16 @@ describe("Parse Binance Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      tradeDate  : new Date(1516592552000),
-      side       : "B",
-      price      : 0.0019488,
-      counterCcy : 'BTC',
-      baseCcy    : 'LSK',
-      amount     : 104.38,
-      feeCcy     : 'LSK',
-      fee        : 0.10438,
-      total      : 0.203415744,
+      tradeDate: new Date("2018-01-22 12:42:32"),
+      side: "B",
+      price: 0.0019488,
+      counterCcy: 'BTC',
+      baseCcy: 'LSK',
+      amount: 104.38,
+      feeCcy: 'LSK',
+      fee: 0.10438,
+      total: 0.203415744,
+      ex: 'Binance',
     });
   });
 
@@ -24,16 +25,19 @@ describe("Parse Binance Trade History", function() {
     const ret = parser(history);
     expect(ret.length).toBe(1);
     expect(ret[0]).toEqual({
-      tradeDate  : new Date(1516592384000),
-      side       : "S",
-      price      : 0.00011582,
-      counterCcy : 'BTC',
-      baseCcy    : 'XRP',
-      amount     : 670,
-      feeCcy     : 'BTC',
-      fee        : 0.0000776,
-      total      : 0.0775994,
+      tradeDate: new Date("2018-01-22 12:39:44"),
+      side: "S",
+      price: 0.00011582,
+      counterCcy: 'BTC',
+      baseCcy: 'XRP',
+      amount: 670,
+      feeCcy: 'BTC',
+      fee: 0.0000776,
+      total: 0.0775994,
+      ex: 'Binance',
     });
   });
+
+  // TODO: Needs more tests.
 
 });

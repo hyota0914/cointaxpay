@@ -98,13 +98,10 @@ class ImportTrade extends Component {
       const filtered = trades.filter((t) => {
         return String(t['tradeDate'].getFullYear()) === String(this.props.year);
       });
-      if (filtered.length !== trades.length) {
-        this.setState({error: `取引年度の異なるデータ${trades.length - filtered.length}件を削除してください`});
-      } else {
-        this.setState({trades: filtered});
-      }
       if (trades.length === 0 && e.target.value) {
         this.setState({error: "有効なデータを入力してください。"});
+      } else {
+        this.setState({trades: filtered});
       }
     } catch (e) {
       this.setState({error: "有効なデータを入力してください。" + e.message});
@@ -164,7 +161,7 @@ class ImportTrade extends Component {
       <div>
         <div className="row">
           <div className="red-text">
-            下記の取引をインポートしてよろしいですか？
+            下記{this.state.trades.length}件の取引をインポートしてよろしいですか？
           </div>
         </div>
         <div className="row">

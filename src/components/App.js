@@ -13,7 +13,7 @@ import EditTrades from './EditTrades';
 const App = () => {
   return <div>
     <Navigation />
-    <div className="main-container container">
+    <div className="main-container">
       <Switch>
         <Route path='/' exact component={Landing} />
         <Route path='/edit-trades' exact component={EditTrades} />

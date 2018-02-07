@@ -37,6 +37,15 @@ const Spec = () => {
             現時点では2017年1月〜2017年12月のみ損益算出が可能です。
           </div>
         </div>
+        <div className="row landing-spacer"></div>
+        <div className="row">
+          <div className="landing-topic-header">
+            <h2>端数処理</h2>
+          </div>
+          <div className="u-full-width">
+            損益(円)の値は四捨五入しています。
+          </div>
+        </div>
       </div>
     </div>
   );

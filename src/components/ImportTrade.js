@@ -17,7 +17,7 @@ const EXCHANGES = [
     ),
   },
   {
-    name: "Zaif",
+    name: "Zaif(現物)",
     howtoImport: (
       <div className="alert">
         [How to]<br />
@@ -74,7 +74,7 @@ class ImportTrade extends Component {
     });
     let parser;
     switch(this.state.exchange) {
-      case 'Zaif': {
+      case 'Zaif(現物)': {
         parser = require('../lib/parse-zaif-trade-history').parseZaifTradeHistory;
         break;
       }

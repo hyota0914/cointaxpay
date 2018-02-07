@@ -21,7 +21,7 @@ describe("Parse Zaif Trade History", function() {
       bonusCcy:'JPY',
       bonus: 0,
       total: 264846.2836,
-      ex: 'Zaif',
+      ex: 'Zaif_cash',
     });
   });
 
@@ -44,7 +44,7 @@ describe("Parse Zaif Trade History", function() {
       bonusCcy:'JPY',
       bonus: 10,
       total: 104880.06,
-      ex: 'Zaif',
+      ex: 'Zaif_cash',
     });
   });
 
@@ -67,7 +67,7 @@ describe("Parse Zaif Trade History", function() {
       bonusCcy: 'JPY',
       bonus: 0,
       total: 0.011252,
-      ex: 'Zaif',
+      ex: 'Zaif_cash',
     });
   });
 

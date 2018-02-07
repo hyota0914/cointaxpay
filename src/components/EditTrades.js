@@ -156,7 +156,7 @@ class EditTrades extends Component {
   byteToString(bytes) {
     let result = "";
     let index = 0;
-    const CHUNK_SIZE = 0x0001;
+    const CHUNK_SIZE = 0x1000;
     while (index < bytes.length) {
       let slice = bytes.slice(index, Math.min(index + CHUNK_SIZE, bytes.length));
       result += String.fromCharCode.apply(null, slice);
@@ -350,7 +350,7 @@ class EditTrades extends Component {
         t.amount,
         t.total,
         t.ex,
-        t.pl.pl,
+        t.pl ? t.pl.pl : "",
         t.pl ? t.pl.balanceAfter.baseCcy.amount : "",
         t.pl ? t.pl.balanceAfter.baseCcy.priceJ : "",
         t.pl ? t.pl.balanceBefore.baseCcy.amount : "",

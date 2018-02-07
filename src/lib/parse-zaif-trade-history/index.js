@@ -39,7 +39,7 @@ module.exports.parseZaifTradeHistory = function(hist) {
       bonusCcy: bonusCcy,
       bonus: bonus,
       total: total,
-      ex: "Zaif",
+      ex: "Zaif_cash",
     });
   });
   return result;

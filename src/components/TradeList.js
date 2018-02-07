@@ -5,113 +5,131 @@ class TradeList extends Component {
 
   renderTradeList() {
     const tradeList = this.props.data.map((trade, index) => {
-      let detail = [];
+      // 取引日付
+      // 売/買
+      // 主軸通貨
+      // 決済通貨
+      // 価格
+      // 数量
+      // 合計
+      // 手数料
+      // 手数料通貨
+      // ボーナス
+      // ボーナス通貨
+      // 取引所
+      // 損益
+      // 取引後残高
+      // 取引後平均原価
       let key = 0;
+      let detail = [
+        <td key={key++} className="date-text">{formatDate(new Date(trade['tradeDate']), 'YYYY/MM/DD hh:mm:ss')}</td>,
+        <td key={key++}>{trade.side === "B" ?
+          <span className="red-text">BUY</span> :
+          <span className="green-text">SELL</span>
+        }</td>,
+        <td key={key++}>{trade.baseCcy}</td>,
+        <td key={key++}>{trade.counterCcy}</td>,
+        <td key={key++} className="number-text">{trade.price}</td>,
+        <td key={key++} className="number-text">{trade.amount}</td>,
+        <td key={key++} className="number-text">{trade.total}</td>,
+        <td key={key++} className="number-text">{trade.fee}</td>,
+        <td key={key++}>{trade.feeCcy}</td>,
+        <td key={key++} className="number-text">{trade.bonus}</td>,
+        <td key={key++}>{trade.bonusCcy}</td>,
+        <td key={key++}>{trade.ex}</td>,
+      ];
+
+      if (trade.pl && trade.pl.balanceAfter) {
+        detail = [detail, ...[
+          <td key={key++} className={
+            trade.pl.pl === 0 ? "number-text" : trade.pl.pl > 0 ? "red-text number-text" : "green-text number-text" 
+          }>{trade.pl.pl > 0 && "+"}{trade.pl.pl}</td>,
+          <td key={key++} className="number-text">{trade.pl.balanceAfter.baseCcy.amount}</td>,
+          <td key={key++} className="number-text">{trade.pl.balanceAfter.baseCcy.priceJ}</td>,
+        ]];
+      } else {
+        detail = [detail, ...[
+          <td key={key++}></td>,
+          <td key={key++}></td>,
+          <td key={key++}></td>,
+        ]];
+      }
+      
       if (this.props.type === "pl-detail") {
-        let className = "number-text number-text";
-        detail.push(trade.baseBeforeBalance ?
-          <td key={++key} className={className}>{
-            trade.baseBeforeBalance.amount}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(trade.baseBeforeBalance ?
-          <td key={++key} className={className}>{
-            trade.baseBeforeBalance.priceJpy}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(trade.counterAfterBalance ?
-          <td key={++key} className={className}>{
-            trade.counterAfterBalance.amount}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(trade.counterAfterBalance ?
-          <td key={++key} className={className}>{
-            trade.counterAfterBalance.priceJpy}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(trade.counterBeforeBalance ?
-          <td key={++key} className={className}>{
-            trade.counterBeforeBalance.amount}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(trade.counterBeforeBalance ?
-          <td key={++key} className={className}>{
-            trade.counterBeforeBalance.priceJpy}</td> :
-          <td key={++key} className={className}></td>
-        );
-        detail.push(
-          <td key={++key} className={className}>{
-            trade.counterCcyMarketPrice
-          }</td>
-        );
+        if (trade.pl && trade.pl.balanceAfter) {
+          // 取引前残高
+          // 取引前平均単価
+          // 取引後残高(決済側)
+          // 取引後平均単価(決済側)
+          // 取引前残高(決済側)
+          // 取引前平均単価(決済側)
+          // 売却通貨レート(円換算)
+          let className = "number-text number-text";
+          detail = [detail, ...[
+            <td key={key++} className={className}>{trade.pl.balanceBefore.baseCcy.amount}</td>,
+            <td key={key++} className={className}>{trade.pl.balanceBefore.baseCcy.priceJ}</td>,
+            <td key={key++} className={className}>{trade.pl.balanceAfter.counterCcy.amount}</td>,
+            <td key={key++} className={className}>{trade.pl.balanceAfter.counterCcy.priceJ}</td>,
+            <td key={key++} className={className}>{trade.pl.balanceBefore.counterCcy.amount}</td>,
+            <td key={key++} className={className}>{trade.pl.balanceBefore.counterCcy.priceJ}</td>,
+            <td key={key++} className={className}>{trade.pl.rate}</td>,
+          ]];
+        } else {
+          detail = [detail, ...[
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+            <td key={key++}></td>,
+          ]];
+        }
       }
 
       return (
         <tr key={index}>
-          <td className="date-text">{formatDate(new Date(trade['tradeDate']), 'YYYY/MM/DD hh:mm:ss')}</td>
-          <td>{trade.side === "B" ?
-            <span className="red-text">BUY</span> :
-            <span className="green-text">SELL</span>
-          }</td>
-          <td>{trade.baseCcy}</td>
-          <td>{trade.counterCcy}</td>
-          <td className="number-text">{trade.price}</td>
-          <td className="number-text">{trade.amount}</td>
-          <td className="number-text">{trade.total}</td>
-          <td>{trade.ex}</td>
-          {Number(trade.pl) === 0 ?
-            <td className="number-text">{trade.pl}</td> : trade.pl > 0 ?
-            <td className="red-text number-text">+{trade.pl}</td> :
-            <td className="green-text number-text">{trade.pl}</td>
-          }
-          {trade.baseAfterBalance ?
-            <td className="number-text">{trade.baseAfterBalance.amount}</td> :
-            <td className="number-text"></td>
-          }
-          {trade.baseAfterBalance ?
-            <td className="number-text">{trade.baseAfterBalance.priceJpy}</td> :
-            <td className="number-text"></td>
-          }
           {detail}
         </tr>);
     });
+
+    let key = 0;
+    let columns = [
+      <th key={key++}>取引日付</th>,
+      <th key={key++}>売/買</th>,
+      <th key={key++}>主軸通貨</th>,
+      <th key={key++}>決済通貨</th>,
+      <th key={key++}>価格</th>,
+      <th key={key++}>数量</th>,
+      <th key={key++}>合計</th>,
+      <th key={key++}>手数料</th>,
+      <th key={key++}>手数料通貨</th>,
+      <th key={key++}>ボーナス</th>,
+      <th key={key++}>ボーナス通貨</th>,
+      <th key={key++}>取引所</th>,
+      <th key={key++}>損益</th>,
+      <th key={key++}>取引後残高</th>,
+      <th key={key++}>取引後平均単価</th>,
+    ];
+
+    if (this.props.type === 'pl-detail') {
+      columns = [columns, ...[
+        <th key={key++}>取引前残高</th>,
+        <th key={key++}>取引前平均単価</th>,
+        <th key={key++}>取引後残高(決済側)</th>,
+        <th key={key++}>取引後平均単価(決済側)</th>,
+        <th key={key++}>取引前残高(決済側)</th>,
+        <th key={key++}>取引前平均単価(決済側)</th>,
+        <th key={key++}>売却通貨レート(円換算)</th>,
+      ]];
+    }
+
     return (
       <div className="overflow-table">
         <table className="u-full-width blueTable">
           <thead>
            <tr>
-             <th>取引日付</th>
-             <th>売/買</th>
-             <th>主軸通貨</th>
-             <th>決済通貨</th>
-             <th>価格</th>
-             <th>数量</th>
-             <th>合計</th>
-             <th>取引所</th>
-             <th>損益</th>
-             <th>取引後残高</th>
-             <th>取引後平均原価</th>
-             {this.props.type === "pl-detail" &&
-               <th>取引前残高</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>取引前平均単価</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>取引後残高(決済側)</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>取引後平均単価(決済側)</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>取引前残高(決済側)</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>取引前平均単価(決済側)</th>
-             }
-             {this.props.type === "pl-detail" &&
-               <th>決済通貨市場価格(円)</th>
-             }
+            {columns}
            </tr>
           </thead>
           <tbody>

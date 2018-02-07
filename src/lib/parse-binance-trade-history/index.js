@@ -43,6 +43,14 @@ module.exports.parseBinanceTradeHistory = function(hist) {
     if (!isValid(t)) throw new Error(`Invalid input! "${t}"`);
     const [baseCcy, counterCcy] = returnPairFromMarket(t[1]);
     if (!baseCcy || !counterCcy) throw new Error(`Invalid input! "${t}"`)
+    if (t[6] !== '') {
+      if (t[2] === 'BUY' && t[7] !== baseCcy) {
+        throw new Error(`Invalid input! "${t}"`);
+      }
+      if (t[2] === 'SELL' && t[7] !== counterCcy) {
+        throw new Error(`Invalid input! "${t}"`);
+      }
+    }
     result.push({
       tradeDate: new Date(t[0]),
       side: t[2] === 'BUY' ? "B": "S",

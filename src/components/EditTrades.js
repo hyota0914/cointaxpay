@@ -287,8 +287,8 @@ class EditTrades extends Component {
     if (window.confirm(`${this.state.year}年度の損益計算を行います。よろしいですか？`)) {
       try {
         let fn = require('../lib/calc-profit-and-loss/CalcProfitAndLoss').calcProfitAndLoss;
-        let [tradesNew, balanceNew] = fn(this.state.editData.trades, []);
         const editData = this.state.editData;
+        let [tradesNew, balanceNew] = fn(editData.trades, editData.startBalance || []);
         editData.trades = tradesNew;
         editData.balance = balanceNew;
         EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, this.state.editData)
@@ -314,7 +314,7 @@ class EditTrades extends Component {
     this.setState({page: Number(e.target.name)});
   }
 
-  handleGenerateCSV(e) {
+  handleGenerateCsv(e) {
     const download = this.state.download;
     let data = [[
       'id',
@@ -328,7 +328,7 @@ class EditTrades extends Component {
       '取引所',
       '損益',
       '取引後残高',
-      '取引後平均原価',
+      '取引後平均単価',
       '取引前残高',
       '取引前平均単価',
       '取引後残高(決済側)',
@@ -348,16 +348,16 @@ class EditTrades extends Component {
         t.amount,
         t.total,
         t.ex,
-        t.pl,
-        t.baseAfterBalance ? t.baseAfterBalance.amount : "",
-        t.baseAfterBalance ? t.baseAfterBalance.priceJpy : "",
-        t.baseBeforeBalance ? t.baseBeforeBalance.amount : "",
-        t.baseBeforeBalance ? t.baseBeforeBalance.priceJpy : "",
-        t.counterAfterBalance ? t.counterAfterBalance.amount : "",
-        t.counterAfterBalance ? t.counterAfterBalance.priceJpy : "",
-        t.counterBeforeBalance ? t.counterBeforeBalance.amount : "",
-        t.counterBeforeBalance ? t.counterBeforeBalance.priceJpy : "",
-        t.counterCcyMarketPrice,
+        t.pl.pl,
+        t.pl ? t.pl.balanceAfter.baseCcy.amount : "",
+        t.pl ? t.pl.balanceAfter.baseCcy.priceJ : "",
+        t.pl ? t.pl.balanceBefore.baseCcy.amount : "",
+        t.pl ? t.pl.balanceBefore.baseCcy.priceJ : "",
+        t.pl ? t.pl.balanceAfter.counterCcy.amount : "",
+        t.pl ? t.pl.balanceAfter.counterCcy.priceJ : "",
+        t.pl ? t.pl.balanceBefore.counterCcy.amount : "",
+        t.pl ? t.pl.balanceBefore.counterCcy.priceJ : "",
+        t.pl ? t.pl.rate : "",
       ]);
     });
     console.log(data);
@@ -549,7 +549,7 @@ class EditTrades extends Component {
                 this.handleSortByDate.bind(this)
               }>日付昇順</button>
               <button className="button float-button flat-button" onClick={
-                this.handleGenerateCSV.bind(this)
+                this.handleGenerateCsv.bind(this)
               }>CSV作成</button>
               {this.state.download.data && (
                 <a className="button float-button flat-button" href={

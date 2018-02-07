@@ -3,10 +3,8 @@
 function defaultBalance(ccy) {
   return {
     ccy: ccy,
-    latest: {
-      amount: 0,
-      priceJpy: 1,
-    },
+    amount: 0,
+    priceJ: 0,
   };
 }
 
@@ -14,7 +12,8 @@ function round(num, digits) {
   return Number(Math.round(`${num}e${digits}`) + `e-${digits}`);
 }
 
-const fetchMarketPrice = (function() {
+function CalcProfitAndLoss () {};
+CalcProfitAndLoss.fetchMarketPrice = (function() {
   const useMarketRateInCoincheck = [
     'BTC',
     'ETH',
@@ -38,98 +37,155 @@ const fetchMarketPrice = (function() {
     }
     price = Number(price);
     if (!price || isNaN(price)) {
-      throw new Error(`Sorry, market rate of ccy(${ccy}) on ${date} is not available yet.`);
+      throw new Error(`Market rate of ccy(${ccy}) on ${date} is not available yet.`);
     }
     return price;
   }
 })();
+
+function returnTotalAveragePrice(balanceBefore, amount, priceJ) {
+  if (balanceBefore.amount + amount === 0) {
+    return priceJ;
+  }
+  let v = (balanceBefore.amount * balanceBefore.priceJ)
+    + (amount * priceJ);
+  let result = v / (balanceBefore.amount + amount)
+  if (isNaN(result) || !isFinite(result)) {
+    console.log(balanceBefore, amount, priceJ);
+    throw new Error(`Failed to calc jpy price.`);
+  }
+  return result;
+}
+
+function returnPayedJpyToExchange(tradeDate, payedCcy, payedAmount) {
+  let rate = CalcProfitAndLoss.fetchMarketPrice(tradeDate, payedCcy)
+  return [rate, rate * payedAmount];
+}
 
 function calcProfitAndLossPerTrade(trade, balance) {
   const baseCcy = trade.baseCcy;
   const baseCcyBalance = balance[baseCcy] || defaultBalance(baseCcy);
   const counterCcy = trade.counterCcy;
   const counterCcyBalance = balance[counterCcy] || defaultBalance(counterCcy);
-  trade.baseBeforeBalance = Object.assign({}, baseCcyBalance.latest);
-  trade.counterBeforeBalance = Object.assign({}, counterCcyBalance.latest);
 
-  // Price in jpy
-  {
-    let counterCcyMarketPrice = fetchMarketPrice(
-      new Date(Date.parse(trade.tradeDate)), counterCcy)
-    trade.priceJpy = round(counterCcyMarketPrice * trade.price, 9);;
-    trade.counterCcyMarketPrice = counterCcyMarketPrice;
+  let pl = {
+    amount : trade.amount,
+    total : trade.amount * trade.price,
+    price : trade.price,
+    pl : 0,
+    balanceBefore : {
+      baseCcy: Object.assign({}, baseCcyBalance),
+      counterCcy: Object.assign({}, counterCcyBalance),
+    },
+    balanceAfter : {},
   }
 
-  // Base Amount
-  {
-    let baseAmount = Number(baseCcyBalance.latest.amount);
-    if (trade.side === 'B') {
-      baseAmount += Number(trade.amount);
+  // Reflect fee to amount or total
+  if (trade.fee && trade.fee !== 0) {
+    if (trade.side === 'B' && trade.feeCcy === baseCcy) {
+      pl.amount -= trade.fee;
+    } else if (trade.side === 'S' && trade.feeCcy === counterCcy) {
+      pl.total -= trade.fee;
     } else {
-      baseAmount -= Number(trade.amount);
+      console.log(trade);
+      throw new Error(`Fee ccy is not valid!`);
     }
-    baseAmount = round(baseAmount, 9);
-    baseCcyBalance.latest.amount = baseAmount;
   }
 
-  // counter Amount
-  {
-    let counterAmount = Number(counterCcyBalance.latest.amount);
+  // Reflect fee to price
+  if (trade.fee) {
+    pl.price = pl.total / pl.amount;
+  }
+
+  // Calc price in JPY
+  if (counterCcy === 'JPY') {
+    pl.priceJ = pl.price;
+    pl.rate = 1;
+  } else {
     if (trade.side === 'B') {
-      counterAmount -= Number(trade.total);
-    } else if (trade.side === 'S') {
-      counterAmount += Number(trade.total);
+      // Assume counter ccy changed to jpy, and bought base ccy.
+      let [rate, payedValue] = returnPayedJpyToExchange(
+        new Date(trade.tradeDate), counterCcy, pl.total);
+      pl.rate = rate;
+      pl.priceJ = payedValue / pl.amount;
+    } else {
+      // Assume base ccy changed to jpy, and bought counter ccy.
+      let [rate, payedValue] = returnPayedJpyToExchange(
+        new Date(trade.tradeDate), baseCcy, pl.amount);
+      pl.rate = rate;
+      pl.priceJ = payedValue / pl.total;
     }
-    counterAmount = round(counterAmount, 9);
-    counterCcyBalance.latest.amount = counterAmount;
   }
   
-  // Total average price
+  // Update balance and avg price
   if (trade.side === 'B') {
-    // If side is buy, need to recalc "total average price" of the base ccy.
-    baseCcyBalance.latest.priceJpy = round(((trade.baseBeforeBalance.amount * trade.baseBeforeBalance.priceJpy)
-      + (trade.amount * trade.priceJpy)) / (trade.baseBeforeBalance.amount + trade.amount), 9);
-    if (isNaN(baseCcyBalance.latest.priceJpy) || !isFinite(baseCcyBalance.latest.priceJpy)) {
-      console.log(trade);
-      throw new Error(`Sorry, failed to calc jpy price`);
+    baseCcyBalance.amount = round(baseCcyBalance.amount + pl.amount, 9);
+    counterCcyBalance.amount = round(counterCcyBalance.amount - pl.total, 9);
+    baseCcyBalance.priceJ = returnTotalAveragePrice(
+      pl.balanceBefore.baseCcy, pl.amount, pl.priceJ);
+    if (counterCcy === 'JPY') {
+      counterCcyBalance.priceJ = 1;
     }
-  } else if (trade.side === 'S') {
-    // If side is sell, need to recalc "total average price" of the counter ccy.
-    counterCcyBalance.latest.priceJpy = round(((trade.counterBeforeBalance.amount * trade.counterBeforeBalance.priceJpy)
-      + (trade.total * trade.counterCcyMarketPrice)) / (trade.counterBeforeBalance.amount + trade.total), 9);
-    if (counterCcy === 'JPY' && counterCcyBalance.latest.priceJpy !== 1) {
-      console.log(trade);
-      throw new Error(`Sorry, failed to calc jpy balance`);
-    }
-    if (isNaN(counterCcyBalance.latest.priceJpy) || !isFinite(counterCcyBalance.latest.priceJpy)) {
-      console.log(trade);
-      throw new Error(`Sorry, failed to calc jpy price`);
+  } else {
+    baseCcyBalance.amount = round(baseCcyBalance.amount - pl.amount, 9);
+    counterCcyBalance.amount = round(counterCcyBalance.amount + pl.total, 9);
+    if (counterCcy === 'JPY') {
+      counterCcyBalance.priceJ = returnTotalAveragePrice(
+        pl.balanceBefore.counterCcy, pl.total, 1);
+    } else {
+      counterCcyBalance.priceJ = returnTotalAveragePrice(
+        pl.balanceBefore.counterCcy, pl.total, pl.priceJ);
     }
   }
 
   // Calc profit and loss
-  {
-    let profitAndLoss = 0;
-    if (trade.side === 'B') {
-      // If side is buy, need to calc profit and loss of counter ccy.
-			profitAndLoss = counterCcy === 'JPY' ? 0
-        : round(trade.total * trade.counterBeforeBalance.priceJpy
-          - trade.amount * trade.priceJpy, 9);
-    } else if (trade.side === 'S') {
-      // If side is sell, need to calc profit and loss of base ccy.
-      profitAndLoss = round(trade.amount * trade.priceJpy
-        - trade.amount * baseCcyBalance.latest.priceJpy, 9);
+  if (trade.side === 'B') {
+    // If side is buy, need to calc profit and loss of counter ccy.
+    if (counterCcy === 'JPY') {
+      pl.pl = 0;
+    } else {
+      pl.pl = round(pl.total * pl.rate
+        - pl.total * pl.balanceBefore.counterCcy.priceJ, 9);
     }
-    trade.pl = profitAndLoss;
-    if (isNaN(trade.pl) || !isFinite(trade.pl)) {
-      console.log(trade);
-      throw new Error(`Sorry, failed to calc profit and loss`);
+  } else if (trade.side === 'S') {
+    // If side is sell, need to calc profit and loss of base ccy.
+    if (counterCcy === 'JPY') {
+      pl.pl = round(pl.amount * pl.priceJ
+        - pl.amount * pl.balanceBefore.baseCcy.priceJ, 9);
+    } else {
+      pl.pl = round(pl.amount * pl.rate
+        - pl.amount * pl.balanceBefore.baseCcy.priceJ, 9);
     }
   }
 
+  // Reflect bonus to pl
+  if (trade.bonus && trade.bonusCcy === 'JPY') {
+    pl.pl += trade.bonus;
+  } else if (trade.bonus && trade.bonusCcy !== 'JPY') {
+    throw new Error(`Invalid bonus ccy: ${trade.bonusCcy}`);
+  }
+
+  // Reflect fee to pl
+  if (trade.fee) {
+    if (trade.side === 'S' && counterCcy !== 'JPY') {
+      pl.pl -= trade.fee * CalcProfitAndLoss.fetchMarketPrice(
+        new Date(trade.tradeDate), trade.feeCcy);
+    }
+  }
+  
+  pl.pl = Math.round(pl.pl);
+  if (isNaN(pl.pl)) {
+    console.log(trade);
+    console.log(pl);
+    throw new Error(`Failed to calc profit and loss`);
+  }
+
   // Update data
-  trade.baseAfterBalance = Object.assign({}, baseCcyBalance.latest);
-  trade.counterAfterBalance = Object.assign({}, counterCcyBalance.latest);
+  pl.balanceAfter = {
+    baseCcy: Object.assign({}, baseCcyBalance),
+    counterCcy: Object.assign({}, counterCcyBalance),
+  };
+  trade.pl = pl;
   balance[baseCcy] = baseCcyBalance;
   balance[counterCcy] = counterCcyBalance;
   return [trade, balance];
@@ -146,7 +202,7 @@ const sortTradeByDateAsc = (t1, t2) => {
   return id1<id2 ? -1 : id1>id2 ? 1: 0;
 };
 
-module.exports.calcProfitAndLoss = (trades, initialBalance) => {
+CalcProfitAndLoss.calcProfitAndLoss = (trades, initialBalance) => {
   let balance = initialBalance || [];
   trades.sort(sortTradeByDateAsc);
   trades = trades.map((trade) => {
@@ -156,7 +212,7 @@ module.exports.calcProfitAndLoss = (trades, initialBalance) => {
   return [trades, balance];
 }
 
-module.exports.calcTotalProfitAndLoss = (year, trades) => {
+CalcProfitAndLoss.calcTotalProfitAndLoss = (year, trades) => {
   try {
     trades.sort(sortTradeByDateAsc);
     const history = (() => {
@@ -172,8 +228,8 @@ module.exports.calcTotalProfitAndLoss = (year, trades) => {
       let dt = new Date(t.tradeDate);
       dt = new Date(dt.getTime() + (dt.getTimezoneOffset()*60*1000))
       dt = new Date(`${dt.getUTCFullYear()}-${dt.getUTCMonth() + 1}-${dt.getUTCDate()} GMT+0900`);
-      current.latest += t.pl || 0;
-      history[dt.getTime()].pl += t.pl || 0;
+      current.latest += t.pl.pl || 0;
+      history[dt.getTime()].pl += t.pl.pl || 0;
       return current;
     }, {
       latest: 0,
@@ -196,4 +252,6 @@ module.exports.calcTotalProfitAndLoss = (year, trades) => {
     return {};
   }
 }
+
+module.exports = CalcProfitAndLoss;
 

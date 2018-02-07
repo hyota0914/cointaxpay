@@ -4,7 +4,7 @@ class SelectYear extends Component {
   render() {
     const list = (() => {
       const list = [];
-      for (let i = 2010; i <= 2018; ++i) {
+      for (let i = 2017; i <= 2018; ++i) {
         list.push(
           <button className="button float-button" onClick={(e) => {
             e.preventDefault();

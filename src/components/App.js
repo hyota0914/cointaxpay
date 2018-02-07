@@ -9,6 +9,9 @@ import Account from './Account';
 import Landing from './Landing';
 import Navigation from './Navigation';
 import EditTrades from './EditTrades';
+import Spec from './Spec';
+import Contribute from './Contribute';
+import Security from './Security';
 
 const App = () => {
   return <div>
@@ -20,6 +23,9 @@ const App = () => {
         <Route path='/account' component={Account} />
         <Route path='/signin' component={SignIn} />
         <Route path='/signup' component={SignUp} />
+        <Route path='/spec' component={Spec} />
+        <Route path='/contribute' component={Contribute} />
+        <Route path='/security' component={Security} />
       </Switch>
       <Switch>
         <Route path='/edit-trades' component={SignInCheck} />

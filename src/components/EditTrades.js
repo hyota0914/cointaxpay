@@ -45,7 +45,9 @@ class EditTrades extends Component {
 
   constructor(props) {
     super(props);
-    const defaultYear = (new Date(Date.now())).getFullYear() - 1;
+    // TODO: 現時点では固定
+    //const defaultYear = (new Date(Date.now())).getFullYear() - 1;
+    const defaultYear = 2017;
     this.state = {
       view: VIEWS.TRADE_LIST,
       editData: null,

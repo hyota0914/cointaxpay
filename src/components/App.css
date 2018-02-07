@@ -8,6 +8,11 @@ body{
   background-color: #ccffff;
   margin-bottom: 10px;
 }
+.landing-logo {
+  height: 150px;
+  display: block;
+  margin: 0 auto;
+}
 .loading-center {
   position: fixed;
   top: 50%;
@@ -15,6 +20,10 @@ body{
   z-index: 2048;
   margin-top: -17px;
   margin-left: -17px;
+}
+.qr-code {
+  height: 200px;
+  width: 200px;
 }
 .margin-left-10 {
   margin-left: 10px;
@@ -120,7 +129,10 @@ body{
 }
 
 .landing-spacer {
-  height: 20px;
+  height: 30px;
+}
+.landing-spacer-bottom {
+  height: 60px;
 }
 
 .landing-feature-header {

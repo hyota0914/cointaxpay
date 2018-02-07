@@ -5,10 +5,10 @@ const Landing = () => {
     <div className="container">
       <div>
         <div className="landing-header">
-          <h1>Cointaxpay</h1>
+          <img src="/images/logo_large.png" className="landing-logo" /><br />
         </div>
         <div className="u-full-width">
-          Cointaxpay(β)は、仮想通貨の損益計算に困っている方々向けの損益計算アプリケーションになります。簡単な操作で年間でどれだけの利益・損失があったかを一瞬で計算できます。バグ報告、ご質問、ご要望がありましたら、お気軽にツイッターアカウントまでお知らせください。
+          Cointaxpay(β)は、仮想通貨の損益計算に困っている方々向けの損益計算アプリです。簡単操作で仮想通貨の年間利益・損失を計算できます。バグ報告、ご質問、ご要望がありましたら、お気軽に<a href="https://twitter.com/cointaxpay_jp" target="_blank">ツイッターアカウント</a>までDM等でお知らせください。
         </div>
         <div className="row landing-spacer"></div>
         <div className="row">
@@ -69,12 +69,26 @@ const Landing = () => {
       <div className="row landing-spacer"></div>
       <div className="row">
         <div className="landing-topic-header">
-          <h2>ご注意事項</h2>
+          <h2>免責事項</h2>
         </div>
       </div>
-      <div className="twelve columns u-full-width">
-        Cointaxpay(β)は試作段階のアプリとなります。ご利用は自己責任でお願いいたします。何らかの損害が生じたとしても一切責任は負えません。確定申告の際には、計算結果を十分ご確認ください。
+      <div className="row">
+        <div className="twelve columns u-full-width">
+          計算結果はテストを行い、確認しておりますが、Cointaxpay(β)は試作段階のアプリとなります。ご利用は自己責任でお願いいたします。本アプリを利用することにより、いかなる損害が生じたとしても当方は責任は負えません。確定申告の際には、計算結果を十分ご確認ください。
+        </div>
       </div>
+      <div className="row landing-spacer"></div>
+      <div className="row">
+        <div className="landing-topic-header">
+          <h2>お問い合わせ</h2>
+        </div>
+      </div>
+      <div className="row">
+        <div className="twelve columns u-full-width">
+          お問い合わせは<a href="https://twitter.com/cointaxpay_jp" target="_blank">ツイッターアカウント</a>にご連絡ください。または、メールアドレス(cointaxpay@gmail.com)までメールください。
+        </div>
+      </div>
+      <div className="row landing-spacer-bottom"></div>
     </div>
   );
 }

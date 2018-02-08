@@ -119,12 +119,12 @@ describe("Calc profit and loss", function() {
         baseCcy: {
           ccy: 'XEM',
           amount: 0,
-          priceJ: 19.4998,
+          priceJ: 0,
         },
         counterCcy: {
           ccy: 'JPY',
           amount: 0,
-          priceJ: 1,
+          priceJ: 0,
         },
       },
     });

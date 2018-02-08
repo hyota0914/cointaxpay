@@ -4,6 +4,7 @@ import TradeList from './TradeList';
 import SelectYear from './SelectYear';
 import ImportTrade from './ImportTrade';
 import PlTotal from './PlTotal';
+import Balance from './Balance';
 import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
 import AmazonS3 from '../lib/connect-with-aws/AmazonS3';
 import { ScaleLoader } from 'react-spinners';
@@ -330,13 +331,13 @@ class EditTrades extends Component {
       '取引所',
       '損益',
       '取引後残高',
-      '取引後平均単価',
+      '取引後平均原価',
       '取引前残高',
-      '取引前平均単価',
+      '取引前平均原価',
       '取引後残高(決済側)',
-      '取引後平均単価(決済側)',
+      '取引後平均原価(決済側)',
       '取引前残高(決済側)',
-      '取引前平均単価(決済側)',
+      '取引前平均原価(決済側)',
       '決済通貨市場価格(円)',
     ]];
     this.state.editData.trades.forEach((t) => {
@@ -457,6 +458,7 @@ class EditTrades extends Component {
     if (!this.state.editData) {
       return <div>取引データを読み込み中です</div>;
     }
+    console.log(this.state.editData);
     let trades;
     let pages;
     if (this.state.view === VIEWS.TRADE_LIST || this.state.view === VIEWS.PL_DETAIL) {
@@ -491,15 +493,18 @@ class EditTrades extends Component {
           }>取引一覧</button>
           <button className="button float-button" onClick={
             this.handleCalcProfitAndLoss.bind(this)
-          }>損益計算</button>
+          }>損益・残高計算</button>
           <button className="button float-button" name={VIEWS.PL_DETAIL} onClick={
             this.handleSwithView.bind(this)
           }>損益詳細</button>
           <button className="button float-button" name={VIEWS.PL_TOTAL} onClick={
             this.handleSwithView.bind(this)
           }>損益トータル</button>
-          <button className="button float-button" name={VIEWS.SELECT_YEAR} onClick={
+          <button className="button float-button" name={VIEWS.BALANCE} onClick={
             this.handleSwithView.bind(this)
+          }>残高一覧</button>
+          <button className="button float-button" onClick={
+            this.handleCalcProfitAndLoss.bind(this)
           }>年度切替え</button>
         </div>
         <div className="row">
@@ -532,6 +537,10 @@ class EditTrades extends Component {
             require('../lib/calc-profit-and-loss/CalcProfitAndLoss')
               .calcTotalProfitAndLoss(this.state.editData.year, this.state.editData.trades)
           } />}
+        {this.state.view === VIEWS.BALANCE &&
+          <Balance  data={
+            this.state.editData ? this.state.editData.balance.filter((r) => r['ccy'] !== 'JPY') : ""
+          } year={this.state.year} />}
         {(this.state.view === VIEWS.TRADE_LIST || this.state.view === VIEWS.PL_DETAIL) && (
           <div>
             <div className="row">

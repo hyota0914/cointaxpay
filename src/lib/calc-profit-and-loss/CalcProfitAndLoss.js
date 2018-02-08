@@ -62,6 +62,14 @@ function returnPayedJpyToExchange(tradeDate, payedCcy, payedAmount) {
   return [rate, rate * payedAmount];
 }
 
+function balanceToArray(balance) {
+  let result = [];
+  Object.keys(balance).forEach((k) => {
+    result.push(balance[k]);
+  });
+  return result;
+}
+
 function calcProfitAndLossPerTrade(trade, balance) {
   const baseCcy = trade.baseCcy;
   const baseCcyBalance = balance[baseCcy] || defaultBalance(baseCcy);
@@ -137,6 +145,12 @@ function calcProfitAndLossPerTrade(trade, balance) {
         pl.balanceBefore.counterCcy, pl.total, pl.priceJ);
     }
   }
+  if (baseCcyBalance.amount === 0) {
+    baseCcyBalance.priceJ = 0;
+  }
+  if (counterCcyBalance.amount === 0) {
+    counterCcyBalance.priceJ = 0;
+  }
 
   // Calc profit and loss
   if (trade.side === 'B') {
@@ -144,17 +158,17 @@ function calcProfitAndLossPerTrade(trade, balance) {
     if (counterCcy === 'JPY') {
       pl.pl = 0;
     } else {
-      pl.pl = round(pl.total * pl.rate
-        - pl.total * pl.balanceBefore.counterCcy.priceJ, 9);
+      pl.pl = pl.total * pl.rate
+        - pl.total * pl.balanceBefore.counterCcy.priceJ;
     }
   } else if (trade.side === 'S') {
     // If side is sell, need to calc profit and loss of base ccy.
     if (counterCcy === 'JPY') {
-      pl.pl = round(pl.amount * pl.priceJ
-        - pl.amount * pl.balanceBefore.baseCcy.priceJ, 9);
+      pl.pl = pl.amount * pl.priceJ
+        - pl.amount * pl.balanceBefore.baseCcy.priceJ;
     } else {
-      pl.pl = round(pl.amount * pl.rate
-        - pl.amount * pl.balanceBefore.baseCcy.priceJ, 9);
+      pl.pl = pl.amount * pl.rate
+        - pl.amount * pl.balanceBefore.baseCcy.priceJ;
     }
   }
 
@@ -173,7 +187,7 @@ function calcProfitAndLossPerTrade(trade, balance) {
     }
   }
   
-  pl.pl = Math.round(pl.pl);
+  pl.pl = Math.floor(pl.pl);
   if (isNaN(pl.pl)) {
     console.log(trade);
     console.log(pl);
@@ -209,7 +223,7 @@ CalcProfitAndLoss.calcProfitAndLoss = (trades, initialBalance) => {
     [trade, balance] = calcProfitAndLossPerTrade(trade, balance);
     return trade;
   });
-  return [trades, balance];
+  return [trades, balanceToArray(balance)];
 }
 
 CalcProfitAndLoss.calcTotalProfitAndLoss = (year, trades) => {

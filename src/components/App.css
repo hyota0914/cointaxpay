@@ -35,6 +35,9 @@ body{
 .horizontal-spacer-opaque {
   height: 10px;
 }
+.horizontal-spacer-bottom {
+  height: 30px;
+}
 .filter-input {
   margin-left: 8px;
   width: 60px;

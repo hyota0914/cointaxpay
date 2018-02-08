@@ -74,7 +74,7 @@ const Landing = () => {
       </div>
       <div className="row">
         <div className="twelve columns u-full-width">
-          計算結果はテストを行い、確認しておりますが、Cointaxpay(β)は試作段階のアプリとなります。ご利用は自己責任でお願いいたします。本アプリを利用することにより、いかなる損害が生じたとしても当方は責任は負えません。確定申告の際には、計算結果を十分ご確認ください。
+          Cointaxpay(β)は試作段階のアプリとなります。ご利用は自己責任でお願いいたします。本アプリを利用することにより、いかなる損害が生じたとしても当方は責任は負えません。確定申告の際には、計算結果を十分ご確認ください。
         </div>
       </div>
       <div className="row landing-spacer"></div>

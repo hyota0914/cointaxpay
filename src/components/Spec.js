@@ -43,7 +43,7 @@ const Spec = () => {
             <h2>端数処理</h2>
           </div>
           <div className="u-full-width">
-            損益(円)の値は四捨五入しています。
+            損益(円)は小数点以下を切り捨てします。
           </div>
         </div>
       </div>

@@ -58,11 +58,11 @@ class TradeList extends Component {
       if (this.props.type === "pl-detail") {
         if (trade.pl && trade.pl.balanceAfter) {
           // 取引前残高
-          // 取引前平均単価
+          // 取引前平均原価
           // 取引後残高(決済側)
-          // 取引後平均単価(決済側)
+          // 取引後平均原価(決済側)
           // 取引前残高(決済側)
-          // 取引前平均単価(決済側)
+          // 取引前平均原価(決済側)
           // 売却通貨レート(円換算)
           let className = "number-text number-text";
           detail = [detail, ...[
@@ -109,17 +109,17 @@ class TradeList extends Component {
       <th key={key++}>取引所</th>,
       <th key={key++}>損益</th>,
       <th key={key++}>取引後残高</th>,
-      <th key={key++}>取引後平均単価</th>,
+      <th key={key++}>取引後平均原価</th>,
     ];
 
     if (this.props.type === 'pl-detail') {
       columns = [columns, ...[
         <th key={key++}>取引前残高</th>,
-        <th key={key++}>取引前平均単価</th>,
+        <th key={key++}>取引前平均原価</th>,
         <th key={key++}>取引後残高(決済側)</th>,
-        <th key={key++}>取引後平均単価(決済側)</th>,
+        <th key={key++}>取引後平均原価(決済側)</th>,
         <th key={key++}>取引前残高(決済側)</th>,
-        <th key={key++}>取引前平均単価(決済側)</th>,
+        <th key={key++}>取引前平均原価(決済側)</th>,
         <th key={key++}>売却通貨レート(円換算)</th>,
       ]];
     }

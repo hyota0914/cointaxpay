@@ -4,18 +4,18 @@ import TradeList from './TradeList';
 import './App.css';
 
 const EXCHANGES = [
-  {
-    name: "Binance",
-    howtoImport: (
-      <div className="alert">
-        [How to]<br />
-        BinanceからTradeHistoryをダウンロードし、内容をコピーして貼り付けてください。<br />
-        [Format]<br />
-        Date  Market  Type  Price Amount  Total Fee Fee Coin<br />
-        * Tab区切り、またはカンマ区切り
-      </div>
-    ),
-  },
+  //{
+  //  name: "Binance",
+  //  howtoImport: (
+  //    <div className="alert">
+  //      [How to]<br />
+  //      BinanceからTradeHistoryをダウンロードし、内容をコピーして貼り付けてください。<br />
+  //      [Format]<br />
+  //      Date  Market  Type  Price Amount  Total Fee Fee Coin<br />
+  //      * Tab区切り、またはカンマ区切り
+  //    </div>
+  //  ),
+  //},
   {
     name: "Zaif(現物)",
     howtoImport: (

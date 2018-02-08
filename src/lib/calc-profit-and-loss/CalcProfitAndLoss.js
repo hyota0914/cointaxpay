@@ -70,6 +70,18 @@ function balanceToArray(balance) {
   return result;
 }
 
+function balanceToObject(data) {
+  let result = {};
+  data.forEach((k) => {
+    result[k.ccy] = {
+      ccy: k.ccy,
+      amount: k.amount,
+      priceJ: k.priceJ,
+    };
+  });
+  return result;
+}
+
 function calcProfitAndLossPerTrade(trade, balance) {
   const baseCcy = trade.baseCcy;
   const baseCcyBalance = balance[baseCcy] || defaultBalance(baseCcy);
@@ -217,7 +229,7 @@ const sortTradeByDateAsc = (t1, t2) => {
 };
 
 CalcProfitAndLoss.calcProfitAndLoss = (trades, initialBalance) => {
-  let balance = initialBalance || [];
+  let balance = Object.assign({}, balanceToObject(initialBalance));
   trades.sort(sortTradeByDateAsc);
   trades = trades.map((trade) => {
     [trade, balance] = calcProfitAndLossPerTrade(trade, balance);

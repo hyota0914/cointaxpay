@@ -5,6 +5,7 @@ import SelectYear from './SelectYear';
 import ImportTrade from './ImportTrade';
 import PlTotal from './PlTotal';
 import Balance from './Balance';
+import BalanceEdit from './BalanceEdit';
 import AmazonAuth from '../lib/connect-with-aws/AmazonAuth';
 import AmazonS3 from '../lib/connect-with-aws/AmazonS3';
 import { ScaleLoader } from 'react-spinners';
@@ -16,6 +17,7 @@ const VIEWS = {
   PL_DETAIL: 'pl-detail',
   PL_TOTAL: 'pl-total',
   BALANCE: 'balance',
+  BALANCE_EDIT: 'balance-edit',
 }
 const EDIT_DATA_STORAGE_KEY = 'TRADE_EDIT_DATA';
 const COUNT_PER_PAGE = 30;
@@ -88,6 +90,8 @@ class EditTrades extends Component {
     return {
       year: this.state.year,
       trades: [],
+      startBalance: [],
+      balance: [],
     };
   }
 
@@ -216,7 +220,7 @@ class EditTrades extends Component {
     e.preventDefault();
     if (window.confirm('編集中のデータをクリアしてよろしいですか？')) {
       let cleared = Object.assign(this.state.editData, this.defaultData());
-      EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, this.state.editData)
+      EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, cleared)
         .then(() => {
           this.setState({
             editData: cleared,
@@ -294,17 +298,17 @@ class EditTrades extends Component {
         let [tradesNew, balanceNew] = fn(editData.trades, editData.startBalance || []);
         editData.trades = tradesNew;
         editData.balance = balanceNew;
-        EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, this.state.editData)
+        EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, editData)
           .then(() => {
             this.setState({
               editData: editData,
               success: '計算完了しました。',
+              view: VIEWS.PL_TOTAL,
             });
           })
           .catch((err) => {
             this.setState({error: 'データ保存に失敗しました。' + err.message});
           });
-        console.log(this.state.editData);
       } catch (e) {
         this.setState({error: 'エラーが発生しました。:' + e.message});
         console.log(e);
@@ -363,7 +367,6 @@ class EditTrades extends Component {
         t.pl ? t.pl.rate : "",
       ]);
     });
-    console.log(data);
     let csv = "";
     data.forEach((r) => {
       csv += r.join(',');
@@ -382,6 +385,22 @@ class EditTrades extends Component {
       year: year,
       view: VIEWS.TRADE_LIST,
     });
+  }
+
+  onEditBalance(balance) {
+    const editData = this.state.editData;
+    editData.startBalance = balance;
+    EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, editData)
+      .then(() => {
+        this.setState({
+          editData: editData,
+          success: '開始時残高を保存しました',
+          view: VIEWS.BALANCE_EDIT,
+        });
+      })
+      .catch((err) => {
+        this.setState({error: 'データ保存に失敗しました'});
+      });
   }
 
   onImportTrades(trades) {
@@ -458,7 +477,6 @@ class EditTrades extends Component {
     if (!this.state.editData) {
       return <div>取引データを読み込み中です</div>;
     }
-    console.log(this.state.editData);
     let trades;
     let pages;
     if (this.state.view === VIEWS.TRADE_LIST || this.state.view === VIEWS.PL_DETAIL) {
@@ -503,6 +521,9 @@ class EditTrades extends Component {
           <button className="button float-button" name={VIEWS.BALANCE} onClick={
             this.handleSwithView.bind(this)
           }>残高一覧</button>
+          <button className="button float-button" name={VIEWS.BALANCE_EDIT} onClick={
+            this.handleSwithView.bind(this)
+          }>初日残高入力</button>
           <button className="button float-button" onClick={
             this.handleCalcProfitAndLoss.bind(this)
           }>年度切替え</button>
@@ -541,6 +562,10 @@ class EditTrades extends Component {
           <Balance  data={
             this.state.editData ? this.state.editData.balance.filter((r) => r['ccy'] !== 'JPY') : ""
           } year={this.state.year} />}
+        {this.state.view === VIEWS.BALANCE_EDIT &&
+          <BalanceEdit  data={
+            this.state.editData.startBalance ? this.state.editData.startBalance : []
+          } year={this.state.year} onEditBalance={this.onEditBalance.bind(this)} />}
         {(this.state.view === VIEWS.TRADE_LIST || this.state.view === VIEWS.PL_DETAIL) && (
           <div>
             <div className="row">

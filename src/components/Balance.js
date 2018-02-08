@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import formatDate from '../lib/format-date';
 
 class Balance extends Component {
 

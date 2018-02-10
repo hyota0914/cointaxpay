@@ -62,24 +62,24 @@ body{
   color: #fff;
 }
 .flat-button {
-  height: 24px;
+  /*height: 24px;*/
   margin: 0 0 0 8px;
   line-height: 24px;
 }
 .nav-container {
   background: #666;
-  height: 60px;
+  /*height: 60px;*/
   padding-left: 20px;
-  position: fixed;
+  /*position: fixed;*/
   width: 100%;
-  top: 0;
+  /*top: 0;*/
   z-index: 1024;
 }
 .nav-container a {
   color: white;
 }
 .main-container {
-  margin-top: 80px;
+  margin-top: 14px;
 }
 .float-button {
   margin-right: 5px;

@@ -77,7 +77,7 @@ AmazonAuth.getUserAttributes = function() {
       if (err) {
         reject(err);
       }
-      if (session.isValid() === false) {
+      if (session && session.isValid() === false) {
         reject("Session is invalid");
       }
       cognitoUser.getUserAttributes((err, result) => {
@@ -147,7 +147,7 @@ AmazonAuth.getSession = function() {
       if (err) {
         reject(err);
       }
-      if (session.isValid() === false) {
+      if (session && session.isValid() === false) {
         reject("Session is invalid");
       }
       resolve(session);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Landing = () => {
   return (
@@ -8,7 +9,9 @@ const Landing = () => {
           <img src="/images/logo_large.png" className="landing-logo" /><br />
         </div>
         <div className="u-full-width">
-          Cointaxpay(β)は、仮想通貨の損益計算に困っている方々向けの損益計算アプリです。簡単操作で仮想通貨の年間利益・損失を計算できます。バグ報告、ご質問、ご要望がありましたら、お気軽に<a href="https://twitter.com/cointaxpay_jp" target="_blank" rel="noopener noreferrer">ツイッターアカウント</a>までDM等でお知らせください。
+          Cointaxpay(β)は、仮想通貨の損益計算に困っている方々向けの損益計算アプリです。簡単操作で仮想通貨の年間利益・損失を計算できます。確定申告の計算にご利用ください。バグ報告、ご質問、ご要望がありましたら、お気軽に<a href="https://twitter.com/cointaxpay_jp" target="_blank" rel="noopener noreferrer">ツイッターアカウント</a>までDM等でお知らせください。
+          <br />
+          新規登録は<Link to="/signup/">こちら</Link>からお願いいたします。
         </div>
         <div className="row landing-spacer"></div>
         <div className="row">

@@ -118,44 +118,52 @@ class EditTrades extends Component {
     if (!window.confirm(`${this.state.year}年度のデータをクラウドに保存します。旧データは上書きされます。よろしいですか？`)) {
       return;
     }
-    this.setS3ButtonDisabled(true);
-    const editData = this.state.editData;
-    if (!editData || !editData.year) {
-      this.setState({error: 'エラーが発生しました。'});
-      return;
-    }
-    if (editData.trades.length === 0) {
-      if (!window.confirm(`データが空です。このまま保存してよろしいですか？`)) {
-        return;
-      }
-    }
-    const err = (e) => {
-      this.setS3ButtonDisabled(false);
-      this.setState({
-        error: 'クラウドへの保存に失敗しました。',
-        loading: false,
-      });
-    };
-    this.setState({loading: true});
-    try {
-      AmazonAuth.refresh().then(() => {
-        AmazonS3.saveDataToAmazonS3(`edit_${this.state.editData.year}.json`, this.state.editData)
-          .then(() => {
-            this.setS3ButtonDisabled(false);
-            this.setState({
-              success: 'クラウドに保存しました。',
-              loading: false,
-            });
-          })
-          .catch((e) => {
+
+    AmazonAuth.refresh()
+      .then(() => {
+        this.setS3ButtonDisabled(true);
+        const editData = this.state.editData;
+        if (!editData || !editData.year) {
+          this.setState({error: 'エラーが発生しました。'});
+          return;
+        }
+        if (editData.trades.length === 0) {
+          if (!window.confirm(`データが空です。このまま保存してよろしいですか？`)) {
+            return;
+          }
+        }
+        const err = (e) => {
+          this.setS3ButtonDisabled(false);
+          this.setState({
+            error: 'クラウドへの保存に失敗しました。',
+            loading: false,
+          });
+        };
+        this.setState({loading: true});
+        try {
+          AmazonAuth.refresh().then(() => {
+            AmazonS3.saveDataToAmazonS3(`edit_${this.state.editData.year}.json`, this.state.editData)
+              .then(() => {
+                this.setS3ButtonDisabled(false);
+                this.setState({
+                  success: 'クラウドに保存しました。',
+                  loading: false,
+                });
+              })
+              .catch((e) => {
+                err(e);
+              });
+          }).catch((e) => {
             err(e);
           });
-      }).catch((e) => {
-        err(e);
+        } catch (e) {
+          err(e);
+        }
+      })
+      .catch((err) => {
+        this.setState({error: 'サインインしてください'});
+        return;
       });
-    } catch (e) {
-      err(e);
-    }
   }
 
   byteToString(bytes) {
@@ -174,46 +182,55 @@ class EditTrades extends Component {
     if (!window.confirm(`${this.state.year}年度のデータをクラウドから読み込みます。編集中データは上書きされます。よろしいですか？`)) {
       return;
     }
-    this.setS3ButtonDisabled(true);
-    this.setState({loading: true});
-    const err = (e) => {
-      console.log(e);
-      this.setS3ButtonDisabled(false);
-      this.setState({
-        error: 'クラウドからのデータ読み込みに失敗しました。',
-        loading: false,
-      });
-    };
-    try {
-      AmazonAuth.refresh().then(() => {
-        AmazonS3.fetchDataFromAmazonS3(`edit_${this.state.editData.year}.json`)
-          .then((data) => {
-            const editDataNew = JSON.parse(this.byteToString(data));
-            if (!editDataNew.year || !editDataNew.trades) {
-              throw new Error('Invalid data format!');
-            }
-            EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, editDataNew)
-              .then(() => {
-                this.setS3ButtonDisabled(false);
-                this.setState({
-                  editData: editDataNew,
-                  success: 'クラウドからデータを読み込みました。',
-                  loading: false,
-                });
+
+    AmazonAuth.refresh()
+      .then(() => {
+        this.setS3ButtonDisabled(true);
+        this.setState({loading: true});
+        const err = (e) => {
+          console.log(e);
+          this.setS3ButtonDisabled(false);
+          this.setState({
+            error: 'クラウドからのデータ読み込みに失敗しました。',
+            loading: false,
+          });
+        };
+        try {
+          AmazonAuth.refresh().then(() => {
+            AmazonS3.fetchDataFromAmazonS3(`edit_${this.state.editData.year}.json`)
+              .then((data) => {
+                const editDataNew = JSON.parse(this.byteToString(data));
+                if (!editDataNew.year || !editDataNew.trades) {
+                  throw new Error('Invalid data format!');
+                }
+                EditDataStorage.saveEditData(EDIT_DATA_STORAGE_KEY, editDataNew)
+                  .then(() => {
+                    this.setS3ButtonDisabled(false);
+                    this.setState({
+                      editData: editDataNew,
+                      success: 'クラウドからデータを読み込みました。',
+                      loading: false,
+                    });
+                  })
+                  .catch((e) => {
+                    err(e)
+                  });
               })
               .catch((e) => {
-                err(e)
+                err(e);
               });
-          })
-          .catch((e) => {
+          }).catch((e) => {
             err(e);
           });
-      }).catch((e) => {
-        err(e);
+        } catch (e) {
+          err(e);
+        }
+      })
+      .catch((err) => {
+        this.setState({error: 'サインインしてください'});
+        return;
       });
-    } catch (e) {
-      err(e);
-    }
+
   }
 
   handleClear(e) {

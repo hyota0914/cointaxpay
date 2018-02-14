@@ -27,9 +27,6 @@ const App = () => {
         <Route path='/contribute' component={Contribute} />
         <Route path='/security' component={Security} />
       </Switch>
-      <Switch>
-        <Route path='/edit-trades' component={SignInCheck} />
-      </Switch>
     </div>
   </div>
 }

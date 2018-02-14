@@ -12,7 +12,7 @@ class PlTotal extends Component {
   }
 
   sortData(order) {
-    if (!this.props.data) {
+    if (!this.props.data || !this.props.data.history) {
       return;
     }
     if (order === "desc") {

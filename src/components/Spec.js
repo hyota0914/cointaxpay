@@ -47,6 +47,7 @@ const Spec = () => {
           </div>
         </div>
       </div>
+      <div className="row landing-spacer-bottom"></div>
     </div>
   );
 }

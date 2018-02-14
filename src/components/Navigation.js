@@ -28,15 +28,12 @@ class Navigation extends Component {
         <li key={key++}><Link to="/edit-trades/">取引データ登録・編集</Link></li>,
         <li key={key++}><Link to="/spec/">計算ロジック</Link></li>,
         <li key={key++}><Link to="/account/">アカウント情報</Link></li>,
-        <li key={key++}><Link to="/contribute/">寄付</Link></li>,
-        <li key={key++}><Link to="/security/">個人情報管理</Link></li>,
       ];
     } else {
       linkListToApped = [
-        <li key={key++}><Link to="/signin/">サインイン</Link></li>,
-        <li key={key++}><Link to="/signup/">新規登録</Link></li>,
+        <li key={key++}><Link to="/edit-trades/">取引データ登録・編集</Link></li>,
         <li key={key++}><Link to="/spec/">計算ロジック</Link></li>,
-        <li key={key++}><Link to="/security/">個人情報管理</Link></li>,
+        <li key={key++}><Link to="/signin/">サインイン</Link></li>,
       ];
     }
     return (
@@ -44,7 +41,7 @@ class Navigation extends Component {
         <div className="container">
           <div className="row">
             <ul className='inline-list hover-links nav-list twelve columns'>
-              <li><Link to="/" className='text-lg'>Cointaxpay(β)</Link></li>
+              <li><Link to="/" className='text-lg'>CoinPL(β)</Link></li>
               {linkListToApped}
             </ul>
           </div>

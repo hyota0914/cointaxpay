@@ -1,7 +1,7 @@
-# CoinTaxPay
-It is software for calculating the profit and loss gained in the transaction of virtual currency and the amount of tax in Japan.
+# CoinPL
+A software for calculating the profit and loss in the virtual currency trades.
 
-## Function
+## Features
 - Input trade data in batch.
 - Calculate profit and loss.
-- Calculate the tax amount in Japan
+- Output data in csv.
